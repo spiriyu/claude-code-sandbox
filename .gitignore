@@ -1,0 +1,12 @@
+node_modules/
+.idea/
+.vscode/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+.nx/cache
+.nx/workspace-data
+dist/
+*.tsbuildinfo

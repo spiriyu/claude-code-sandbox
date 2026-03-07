@@ -1,0 +1,36 @@
+{
+    "name": "claude-code-sandbox",
+    "version": "0.1.0",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "libs/*"
+    ],
+    "scripts": {
+        "build": "npm run build --workspaces --if-present",
+        "test": "npm run test --workspaces --if-present",
+        "lint": "npm run lint --workspaces --if-present",
+        "type-check": "npm run type-check --workspaces --if-present",
+        "cli:build": "npm run build --workspace=apps/cli",
+        "cli:dev": "cd apps/cli && tsx src/cli.ts",
+        "cli:test": "npm run test --workspace=apps/cli",
+        "cli:test:watch": "npm run test:watch --workspace=apps/cli",
+        "cli:lint": "npm run lint --workspace=apps/cli",
+        "cli:type-check": "npm run type-check --workspace=apps/cli",
+        "docker:build": "npm run build --workspace=apps/docker",
+        "docker:generate-matrix": "npm run generate-matrix --workspace=apps/docker",
+        "format": "prettier --write \"**/*.{ts,js,json,md}\" --ignore-path .prettierignore",
+        "format:check": "prettier --check \"**/*.{ts,js,json,md}\" --ignore-path .prettierignore",
+        "release": "node scripts/release.js",
+        "release:dry-run": "node scripts/release.js --dry-run"
+    },
+    "devDependencies": {
+        "eslint": "^9.39.3",
+        "eslint-config-prettier": "^9.1.2",
+        "eslint-plugin-prettier": "^5.5.5",
+        "lint-staged": "^15.5.2",
+        "nx": "^22.5.4",
+        "prettier": "^3.8.1",
+        "typescript-eslint": "^8.56.1"
+    }
+}

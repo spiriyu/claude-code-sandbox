@@ -1,0 +1,19 @@
+services:
+  claude-code-sandbox:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.claude
+      args:
+        USER_UID: ${UID:-1000}
+        USER_GID: ${GID:-1000}
+    container_name: claude-code-sandbox
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - CLAUDE_CODE_OAUTH_TOKEN=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
+    volumes:
+      - ..:/workspace
+#      - ${HOME}/.claude:/home/dev/.claude

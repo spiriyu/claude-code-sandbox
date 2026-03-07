@@ -1,0 +1,53 @@
+{
+    "name": "@claude-code-sandbox/cli",
+    "version": "0.1.0",
+    "description": "CLI for managing the claude-code-sandbox Docker container",
+    "keywords": [
+        "claude",
+        "claude-code",
+        "anthropic",
+        "sandbox",
+        "docker",
+        "cli"
+    ],
+    "homepage": "https://github.com/yar-on/claude-code-sandbox",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yar-on/claude-code-sandbox.git"
+    },
+    "license": "MIT",
+    "bin": {
+        "claude-code-sandbox": "./dist/cli.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "build:watch": "tsup --watch",
+        "dev": "tsx src/cli.ts",
+        "lint": "eslint src",
+        "type-check": "tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {
+        "@spiriyu/claude-code-sandbox-shared": "*",
+        "chalk": "^5.3.0",
+        "commander": "^12.1.0",
+        "dockerode": "^4.0.2",
+        "inquirer": "^12.3.0",
+        "ora": "^8.1.1"
+    },
+    "devDependencies": {
+        "@types/dockerode": "^3.3.32",
+        "@types/node": "^22.0.0",
+        "tsup": "^8.3.0",
+        "typescript": "^5.6.0",
+        "vitest": "^4.0.18",
+        "tsx": "^4.21.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

@@ -1,0 +1,17 @@
+.git/*
+.gitignore
+.github/*
+.idea
+.vscode
+.env
+node_modules/*
+package.json
+package-lock.json
+.release-it.json
+versions.json
+CLAUDE.md
+PUBLISHING.md
+README.md
+LICENSE
+test/*
+scripts/*

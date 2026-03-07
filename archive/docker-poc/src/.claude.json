@@ -1,0 +1,101 @@
+{
+  "numStartups": 1,
+  "tipsHistory": {
+    "new-user-warmup": 1,
+    "plan-mode-for-complex-tasks": 1,
+    "terminal-setup": 1,
+    "memory-command": 1
+  },
+  "cachedGrowthBookFeatures": {
+    "tengu_event_sampling_config": {},
+    "tengu_log_segment_events": false,
+    "tengu_log_datadog_events": true,
+    "tengu_mcp_tool_search": true,
+    "tengu_chomp_inflection": false,
+    "tengu_marble_sandcastle": true,
+    "tengu_marble_anvil": true,
+    "tengu_tool_pear": false,
+    "tengu_scarf_coffee": false,
+    "tengu_streaming_text": false,
+    "tengu-top-of-feed-tip": {
+      "tip": "",
+      "color": ""
+    },
+    "tengu_pr_status_cli": true,
+    "tengu_ccr_bridge": false,
+    "tengu_mcp_elicitation": false,
+    "tengu_keybinding_customization_release": true,
+    "tengu_disable_bypass_permissions_mode": false,
+    "tengu_post_compact_survey": false,
+    "tengu_claudeai_mcp_connectors": true,
+    "tengu_pebble_leaf_prune": false,
+    "tengu_immediate_model_command": false,
+    "tengu_marble_lantern_disabled": false,
+    "enhanced_telemetry_beta": false,
+    "tengu_mulberry_fog": false,
+    "tengu_coral_fern": true,
+    "tengu_scratch": false,
+    "tengu_summarize_tool_results": false,
+    "tengu_bergotte_lantern": false,
+    "tengu_swann_brevity": "control",
+    "tengu_system_prompt_global_cache": true,
+    "tengu_streaming_tool_execution2": true,
+    "tengu_moth_copse": false,
+    "tengu_cache_plum_violet": true,
+    "tengu_tool_search_unsupported_models": [
+      "haiku"
+    ],
+    "tengu_fgts": false,
+    "tengu_plan_mode_interview_phase": false,
+    "tengu_attribution_header": true,
+    "tengu_prompt_cache_1h_config": {
+      "allowlist": [
+        "repl_main_thread*",
+        "sdk"
+      ]
+    },
+    "tengu_session_memory": false
+  },
+  "firstStartTime": "2026-03-01T22:58:41.869Z",
+  "opusProMigrationComplete": true,
+  "sonnet1m45MigrationComplete": true,
+  "userID": "3f0652b14e2a23f718c328c95a15393c33d8e683a57761250bad2895e9b23f86",
+  "cachedChromeExtensionInstalled": false,
+  "changelogLastFetched": 1772453105666,
+  "oauthAccount": {
+    "accountUuid": "7fee261f-14f6-4ae6-89f6-57f1b37d6bc3",
+    "emailAddress": "yaronatidim@gmail.com",
+    "organizationUuid": "a24a879f-f8d2-40ce-9947-2dca14ff9b79",
+    "hasExtraUsageEnabled": false,
+    "billingType": "stripe_subscription",
+    "accountCreatedAt": "2025-08-17T09:03:26.459341Z",
+    "subscriptionCreatedAt": "2025-08-18T04:56:39.446744Z",
+    "displayName": "Yar",
+    "organizationRole": "admin",
+    "workspaceRole": null,
+    "organizationName": "yaronatidim@gmail.com's Organization"
+  },
+  "claudeCodeFirstTokenDate": "2025-08-18T04:57:47.875641Z",
+  "hasCompletedOnboarding": true,
+  "lastOnboardingVersion": "2.1.63",
+  "projects": {
+    "/workspace": {
+      "allowedTools": [],
+      "mcpContextUris": [],
+      "mcpServers": {},
+      "enabledMcpjsonServers": [],
+      "disabledMcpjsonServers": [],
+      "hasTrustDialogAccepted": true,
+      "projectOnboardingSeenCount": 1,
+      "hasClaudeMdExternalIncludesApproved": false,
+      "hasClaudeMdExternalIncludesWarningShown": false
+    }
+  },
+  "lastReleaseNotesSeen": "2.1.63",
+  "hasShownOpus46Notice": {
+    "a24a879f-f8d2-40ce-9947-2dca14ff9b79": true
+  },
+  "cachedExtraUsageDisabledReason": "org_level_disabled",
+  "officialMarketplaceAutoInstallAttempted": true,
+  "officialMarketplaceAutoInstalled": true
+}

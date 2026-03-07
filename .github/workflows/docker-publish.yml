@@ -1,0 +1,112 @@
+name: Build and Publish Docker Images
+
+on:
+  push:
+    tags: ['docker-v*']
+
+env:
+  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/claude-code-sandbox
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      version: ${{ steps.version.outputs.version }}
+      is_rebuild: ${{ steps.version.outputs.is_rebuild }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          # Strip docker-v prefix, then strip optional -rebuild<timestamp> suffix.
+          # docker-v1.2.0              → 1.2.0
+          # docker-v1.2.0-rebuild202603071430 → 1.2.0
+          raw="${GITHUB_REF_NAME#docker-v}"
+          version="${raw%%-rebuild*}"
+          is_rebuild="false"
+          [[ "$GITHUB_REF_NAME" == *"-rebuild"* ]] && is_rebuild="true"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "is_rebuild=$is_rebuild" >> "$GITHUB_OUTPUT"
+
+      - name: Generate build matrix
+        id: matrix
+        run: |
+          matrix=$(RELEASE_VERSION=${{ steps.version.outputs.version }} node apps/docker/scripts/generate-matrix.js)
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Compute full image tags
+        id: tags
+        run: |
+          tags=""
+          IFS=',' read -ra TAG_ARRAY <<< "${{ matrix.tags }}"
+          for tag in "${TAG_ARRAY[@]}"; do
+            tags="${tags}${DOCKER_IMAGE}:${tag},"
+          done
+          # Remove trailing comma
+          tags="${tags%,}"
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/docker
+          file: apps/docker/image/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          build-args: |
+            NODE_VERSION=${{ matrix.node_version }}
+            PYTHON_VERSION=${{ matrix.python_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  release:
+    needs: [prepare, build]
+    # Skip GitHub Release creation for rebuild tags — the release already exists
+    # from the original version publish.
+    if: needs.prepare.outputs.is_rebuild == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: docker-v${{ needs.prepare.outputs.version }}
+          name: Docker v${{ needs.prepare.outputs.version }}
+          body: |
+            Docker image `spiriyu/claude-code-sandbox` v${{ needs.prepare.outputs.version }} published to Docker Hub.
+
+            ```
+            docker pull spiriyu/claude-code-sandbox:latest
+            docker pull spiriyu/claude-code-sandbox:${{ needs.prepare.outputs.version }}
+            ```

@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.nx/
+.claude/
+package-lock.json
+*.tsbuildinfo
+archive/

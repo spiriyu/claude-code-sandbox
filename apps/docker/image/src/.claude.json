@@ -1,0 +1,10 @@
+{
+    "numStartups": 1,
+    "hasCompletedOnboarding": true,
+    "tipsHistory": {
+        "new-user-warmup": 1,
+        "plan-mode-for-complex-tasks": 1,
+        "terminal-setup": 1,
+        "memory-command": 1
+    }
+}

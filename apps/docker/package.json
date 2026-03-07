@@ -1,0 +1,15 @@
+{
+    "name": "@spiriyu/claude-code-sandbox-docker",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Docker image for claude-code-sandbox",
+    "scripts": {
+        "build": "docker build -f image/Dockerfile --build-arg USER_UID=$(id -u) --build-arg USER_GID=$(id -g) -t claude-code-sandbox .",
+        "generate-matrix": "node scripts/generate-matrix.js",
+        "release": "cd ../.. && release-it"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "@spiriyu/claude-code-sandbox-shared": "*"
+    }
+}
