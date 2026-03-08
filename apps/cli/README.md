@@ -119,13 +119,13 @@ claude-code-sandbox start [options]
 
 ```bash
 # Start for current directory
-claude-code-sandbox start
+npx @claude-code-sandbox/cli start
 
 # Start with a specific image version
-claude-code-sandbox start --tag latest_node20_python3.12
+npx @claude-code-sandbox/cli start --tag latest_node20_python3.12
 
 # Force re-pull then start
-claude-code-sandbox start --pull
+npx @claude-code-sandbox/cli start --pull
 ```
 
 ---
@@ -135,7 +135,7 @@ claude-code-sandbox start --pull
 Stop the active container.
 
 ```bash
-claude-code-sandbox stop [options]
+npx @claude-code-sandbox/cli stop [options]
 ```
 
 | Option             | Description                                        |
@@ -151,7 +151,7 @@ Container selection order: `--id` → `currentContainerId` (set via `use`) → w
 Start all stopped containers (does not create new ones).
 
 ```bash
-claude-code-sandbox start-all
+npx @claude-code-sandbox/cli start-all
 ```
 
 ---
@@ -161,7 +161,7 @@ claude-code-sandbox start-all
 Stop all currently running containers.
 
 ```bash
-claude-code-sandbox stop-all [options]
+npx @claude-code-sandbox/cli stop-all [options]
 ```
 
 | Option             | Description                                                       |
@@ -175,7 +175,7 @@ claude-code-sandbox stop-all [options]
 Remove a container from Docker and mark it removed in the config.
 
 ```bash
-claude-code-sandbox remove [options]
+npx @claude-code-sandbox/cli remove [options]
 ```
 
 | Option    | Description              |
@@ -191,7 +191,7 @@ Container selection: same resolution order as `stop`. Prompts for confirmation u
 Attach your terminal to the container's main process (Claude Code).
 
 ```bash
-claude-code-sandbox attach
+npx @claude-code-sandbox/cli attach
 ```
 
 Connects to the running Claude Code process via a raw TTY stream. Terminal resize events are forwarded. Detach with the container's escape sequence or by stopping Claude Code.
@@ -203,7 +203,7 @@ Connects to the running Claude Code process via a raw TTY stream. Terminal resiz
 Open a new login bash session inside the container.
 
 ```bash
-claude-code-sandbox shell
+npx @claude-code-sandbox/cli shell
 ```
 
 Opens a fresh `bash -l` session via `docker exec`. The main Claude Code process keeps running in parallel.
@@ -215,7 +215,7 @@ Opens a fresh `bash -l` session via `docker exec`. The main Claude Code process 
 List all active (non-removed) containers.
 
 ```bash
-claude-code-sandbox ls [options]
+npx @claude-code-sandbox/cli ls [options]
 ```
 
 | Option   | Description    |
@@ -231,7 +231,7 @@ Shows ID, name, workspace, status, and time since last update.
 List all containers including removed ones.
 
 ```bash
-claude-code-sandbox history [options]
+npx @claude-code-sandbox/cli history [options]
 ```
 
 | Option   | Description    |
@@ -247,8 +247,8 @@ Reads from config only (no Docker check required). Useful for auditing past sess
 Set the active container (persists until changed or cleared).
 
 ```bash
-claude-code-sandbox use [id]
-claude-code-sandbox use --clear
+npx @claude-code-sandbox/cli use [id]
+npx @claude-code-sandbox/cli use --clear
 ```
 
 | Option / Argument | Description                                 |
@@ -265,7 +265,7 @@ When no `[id]` is given, an interactive picker shows all Docker-verified contain
 Interactive credential setup wizard.
 
 ```bash
-claude-code-sandbox auth setup
+npx @claude-code-sandbox/cli auth setup
 ```
 
 Guides you through choosing an auth method and storing credentials in `~/.claude-code-sandbox/.env` (chmod 600). Credentials are **never** written to the config store.
@@ -286,7 +286,7 @@ Press **ESC** at any prompt during setup to cancel and return without saving.
 Show currently stored credentials.
 
 ```bash
-claude-code-sandbox auth status
+npx @claude-code-sandbox/cli auth status
 ```
 
 Displays which credential is set and how it will be passed to new containers. Does not show the credential value.
@@ -298,7 +298,7 @@ Displays which credential is set and how it will be passed to new containers. Do
 Show all settings.
 
 ```bash
-claude-code-sandbox config list [--json]
+npx @claude-code-sandbox/cli config list [--json]
 ```
 
 ---
@@ -308,7 +308,7 @@ claude-code-sandbox config list [--json]
 Get a single setting value.
 
 ```bash
-claude-code-sandbox config get <key>
+npx @claude-code-sandbox/cli config get <key>
 ```
 
 ---
@@ -318,7 +318,7 @@ claude-code-sandbox config get <key>
 Set a setting value.
 
 ```bash
-claude-code-sandbox config set <key> <value>
+npx @claude-code-sandbox/cli config set <key> <value>
 ```
 
 **Available settings:**
@@ -333,11 +333,11 @@ claude-code-sandbox config set <key> <value>
 
 ```bash
 # Use a different default image tag
-claude-code-sandbox config set defaultTag latest_node20_python3.12
+npx @claude-code-sandbox/cli config set defaultTag 1.0.0_node20_python3.12
 
 # Set git identity for commits inside containers
-claude-code-sandbox config set gitUserName "Your Name"
-claude-code-sandbox config set gitUserEmail "you@example.com"
+npx @claude-code-sandbox/cli config set gitUserName "Your Name"
+npx @claude-code-sandbox/cli config set gitUserEmail "you@example.com"
 ```
 
 ---
@@ -348,10 +348,10 @@ Reset one or all settings to their defaults.
 
 ```bash
 # Reset everything
-claude-code-sandbox config reset
+npx @claude-code-sandbox/cli config reset
 
 # Reset a specific key
-claude-code-sandbox config reset defaultTag
+npx @claude-code-sandbox/cli config reset defaultTag
 ```
 
 ---
@@ -383,8 +383,8 @@ The `--config-dir` flag (or `CLAUDE_CODE_SANDBOX_CONFIG_DIR` env var) overrides 
 Set once:
 
 ```bash
-claude-code-sandbox config set gitUserName "Your Name"
-claude-code-sandbox config set gitUserEmail "you@example.com"
+npx @claude-code-sandbox/cli config set gitUserName "Your Name"
+npx @claude-code-sandbox/cli config set gitUserEmail "you@example.com"
 ```
 
 When a new container is created, these values are passed as `GIT_USER_NAME` and `GIT_USER_EMAIL` environment variables. The container's entrypoint applies them via:
@@ -397,26 +397,3 @@ git config --global user.email "$GIT_USER_EMAIL"
 This lets Claude commit changes under your identity without any manual configuration inside the container.
 
 ---
-
-## Development
-
-```bash
-# Build
-npx tsup
-
-# Test
-npx vitest run
-
-# Type-check
-npx tsc --noEmit
-
-# Lint
-npx eslint src
-```
-
-From the monorepo root:
-
-```bash
-nx run cli:build
-nx run cli:test
-```
