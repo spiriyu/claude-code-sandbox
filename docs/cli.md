@@ -116,7 +116,7 @@ Config keys:
 
 ### `lib/constants.ts`
 
-Imports `DEFAULT_NODE_VERSION` and `DEFAULT_PYTHON_VERSION` from `@spiriyu/claude-code-sandbox-shared` so they always reflect the highest versions in `libs/shared/src/versions.json`.
+Imports `DEFAULT_NODE_VERSION` and `DEFAULT_PYTHON_VERSION` from `@claude-code-sandbox/shared` so they always reflect the highest versions in `libs/shared/src/versions.json`.
 
 Static constants defined here:
 

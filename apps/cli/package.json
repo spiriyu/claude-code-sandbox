@@ -33,7 +33,6 @@
         "test:watch": "vitest"
     },
     "dependencies": {
-        "@spiriyu/claude-code-sandbox-shared": "*",
         "chalk": "^5.3.0",
         "commander": "^12.1.0",
         "dockerode": "^4.0.2",
@@ -41,6 +40,7 @@
         "ora": "^8.1.1"
     },
     "devDependencies": {
+        "@claude-code-sandbox/shared": "*",
         "@types/dockerode": "^3.3.32",
         "@types/node": "^22.0.0",
         "tsup": "^8.3.0",

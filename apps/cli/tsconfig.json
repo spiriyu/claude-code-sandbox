@@ -3,7 +3,7 @@
     "compilerOptions": {
         "outDir": "dist",
         "paths": {
-            "@spiriyu/claude-code-sandbox-shared": ["../../libs/shared/src/index.ts"]
+            "@claude-code-sandbox/shared": ["../../libs/shared/src/index.ts"]
         }
     },
     "include": ["src"],

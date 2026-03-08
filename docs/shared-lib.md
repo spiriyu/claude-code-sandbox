@@ -1,7 +1,7 @@
-# Shared Library — @spiriyu/claude-code-sandbox-shared
+# Shared Library — @claude-code-sandbox/shared
 
 Source: `libs/shared/`
-Package name: `@spiriyu/claude-code-sandbox-shared` (private — not published to npm)
+Package name: `@claude-code-sandbox/shared` (private — not published to npm)
 
 ## Purpose
 
@@ -44,7 +44,7 @@ import {
     DEFAULT_PYTHON_VERSION, // "3.13" (versions.python[0])
     generateMatrix, // (releaseVersion: string) => { include: MatrixEntry[] }
     MatrixEntry, // interface { node_version, python_version, tags }
-} from '@spiriyu/claude-code-sandbox-shared';
+} from '@claude-code-sandbox/shared';
 ```
 
 ### `versions`

@@ -8,7 +8,7 @@ claude-code-sandbox/
 │   ├── cli/                    # @claude-code-sandbox/cli  — npm CLI package
 │   └── docker/                 # @spiriyu/claude-code-sandbox-docker — Docker image + CI scripts
 ├── libs/
-│   └── shared/                 # @spiriyu/claude-code-sandbox-shared — shared library (private)
+│   └── shared/                 # @claude-code-sandbox/shared — shared library (private)
 ├── .github/
 │   └── workflows/
 │       └── docker-publish.yml  # CI/CD: builds & pushes Docker image on release
@@ -27,19 +27,19 @@ claude-code-sandbox/
 | ------------- | ------------------------------------- | --------------- | ------------------------ |
 | `apps/cli`    | `@claude-code-sandbox/cli`            | npm CLI         | TypeScript, tsup, vitest |
 | `apps/docker` | `@spiriyu/claude-code-sandbox-docker` | Docker image    | Bash, Dockerfile         |
-| `libs/shared` | `@spiriyu/claude-code-sandbox-shared` | Private library | TypeScript               |
+| `libs/shared` | `@claude-code-sandbox/shared` | Private library | TypeScript               |
 
 ## Dependency Graph
 
 ```
 @claude-code-sandbox/cli
-    └── @spiriyu/claude-code-sandbox-shared   (runtime: versions, DEFAULT_*)
+    └── @claude-code-sandbox/shared   (runtime: versions, DEFAULT_*)
 
 @spiriyu/claude-code-sandbox-docker
-    └── @spiriyu/claude-code-sandbox-shared   (build-time: reads versions.json for CI matrix)
+    └── @claude-code-sandbox/shared   (build-time: reads versions.json for CI matrix)
 ```
 
-`@spiriyu/claude-code-sandbox-shared` has no runtime dependencies — it only exports JSON data and pure TypeScript functions.
+`@claude-code-sandbox/shared` has no runtime dependencies — it only exports JSON data and pure TypeScript functions.
 
 ## NX Setup (Lightweight)
 
@@ -63,17 +63,17 @@ Configuration files:
 The root `package.json` declares `"workspaces": ["apps/*", "libs/*"]`. Running `npm install` at the root:
 
 1. Installs all workspace package dependencies into the root `node_modules/`
-2. Creates symlinks: `node_modules/@spiriyu/claude-code-sandbox-shared` → `libs/shared`
+2. Creates symlinks: `node_modules/@claude-code-sandbox/shared` → `libs/shared`
 
-This lets `apps/cli` import `@spiriyu/claude-code-sandbox-shared` as if it were a published npm package, while resolving to the local TypeScript source.
+This lets `apps/cli` import `@claude-code-sandbox/shared` as if it were a published npm package, while resolving to the local TypeScript source.
 
 ## TypeScript Path Resolution
 
-The CLI imports from `@spiriyu/claude-code-sandbox-shared` via three aligned configurations:
+The CLI imports from `@claude-code-sandbox/shared` via three aligned configurations:
 
 | Tool                     | Config                                             | Alias                                                                    |
 | ------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------ |
-| Type-checker (`tsc`)     | `apps/cli/tsconfig.json` → `paths`                 | `@spiriyu/claude-code-sandbox-shared` → `../../libs/shared/src/index.ts` |
+| Type-checker (`tsc`)     | `apps/cli/tsconfig.json` → `paths`                 | `@claude-code-sandbox/shared` → `../../libs/shared/src/index.ts` |
 | Bundler (`tsup`/esbuild) | `apps/cli/tsup.config.ts` → `esbuildOptions.alias` | same path                                                                |
 | Test runner (`vitest`)   | `apps/cli/vitest.config.ts` → `resolve.alias`      | same path                                                                |
 

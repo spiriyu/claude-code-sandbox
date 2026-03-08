@@ -8,13 +8,13 @@ export default defineConfig({
     outDir: 'dist',
     clean: true,
     sourcemap: true,
-    noExternal: ['@spiriyu/claude-code-sandbox-shared'],
+    noExternal: ['@claude-code-sandbox/shared'],
     banner: {
         js: '#!/usr/bin/env node',
     },
     esbuildOptions(options) {
         options.alias = {
-            '@spiriyu/claude-code-sandbox-shared': resolve(__dirname, '../../libs/shared/src/index.ts'),
+            '@claude-code-sandbox/shared': resolve(__dirname, '../../libs/shared/src/index.ts'),
         };
     },
 });

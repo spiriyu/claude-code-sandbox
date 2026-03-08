@@ -8,7 +8,7 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            '@spiriyu/claude-code-sandbox-shared': resolve(__dirname, '../../libs/shared/src/index.ts'),
+            '@claude-code-sandbox/shared': resolve(__dirname, '../../libs/shared/src/index.ts'),
         },
     },
 });

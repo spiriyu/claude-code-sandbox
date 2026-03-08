@@ -188,7 +188,7 @@ claude-code-sandbox/
 │   ├── cli/          # @claude-code-sandbox/cli — npm CLI tool
 │   └── docker/       # Docker image (Dockerfile, entrypoint, CI scripts)
 ├── libs/
-│   └── shared/       # @spiriyu/claude-code-sandbox-shared — versions.json + TypeScript helpers
+│   └── shared/       # @claude-code-sandbox/shared — versions.json + TypeScript helpers
 ├── .github/
 │   └── workflows/
 │       └── docker-publish.yml   # Publishes to Docker Hub on git tag

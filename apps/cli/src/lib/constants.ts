@@ -1,4 +1,4 @@
-import { DEFAULT_NODE_VERSION, DEFAULT_PYTHON_VERSION } from '@spiriyu/claude-code-sandbox-shared';
+import { DEFAULT_NODE_VERSION, DEFAULT_PYTHON_VERSION } from '@claude-code-sandbox/shared';
 import { homedir } from 'os';
 import { join } from 'path';
 
