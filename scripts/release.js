@@ -23,6 +23,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DRY_RUN = process.argv.includes('--dry-run');
+const SKIP_CHECKS = process.argv.includes('--skip-checks');
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -265,8 +266,34 @@ async function flowVersionBump(rl, target) {
 
 // ── main ──────────────────────────────────────────────────────────────────────
 
+function runChecks() {
+    const checks = [
+        { label: 'lint', cmd: 'npm run lint' },
+        { label: 'format', cmd: 'npm run format:check' },
+        { label: 'test', cmd: 'npm run test' },
+    ];
+    console.log('\n  Running pre-release checks…\n');
+    for (const { label, cmd } of checks) {
+        process.stdout.write(`  ▸ ${label}… `);
+        try {
+            execSync(cmd, { cwd: ROOT, stdio: 'pipe' });
+            console.log('✔');
+        } catch (err) {
+            console.log('✖');
+            console.error(`\n  ✖ ${label} failed. Fix the errors above before releasing.\n`);
+            if (err.stdout) process.stderr.write(err.stdout);
+            if (err.stderr) process.stderr.write(err.stderr);
+            process.exit(1);
+        }
+    }
+    console.log('\n  All checks passed.\n');
+}
+
 async function main() {
     if (DRY_RUN) console.log('\n  ⚠  DRY RUN — no files will be changed, no git commands run\n');
+    if (SKIP_CHECKS) console.log('\n  ⚠  Skipping pre-release checks (--skip-checks)\n');
+
+    if (!SKIP_CHECKS && !DRY_RUN) runChecks();
 
     // Check working tree is clean
     try {

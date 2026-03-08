@@ -35,18 +35,21 @@ export function makeConfigCommand(): Command {
     cfg.command('list')
         .description('Show all settings')
         .option('--json', 'Output as JSON')
-        .action(function(this: Command, opts: { json?: boolean }) {
-            const g = this.optsWithGlobals() as { configDir: string };
-            const config = loadConfig(g.configDir);
+        .action(function (this: Command, opts: { json?: boolean }) {
+            const g = this.optsWithGlobals();
+            const config = loadConfig(String(g.configDir));
             const s = config.settings;
             const display = { defaultImage: s.defaultImage, defaultTag: s.defaultTag, authMethod: s.authMethod, gitUserName: s.gitUserName, gitUserEmail: s.gitUserEmail };
 
-            if (opts.json) { console.log(JSON.stringify(display, null, 2)); return; }
+            if (opts.json) {
+                console.log(JSON.stringify(display, null, 2));
+                return;
+            }
 
             logger.blank();
             console.log(chalk.bold('  Settings'));
             logger.line();
-            console.log(`  File: ${chalk.gray(join(g.configDir, 'config.json'))}`);
+            console.log(`  File: ${chalk.gray(join(String(g.configDir), 'config.json'))}`);
             logger.line();
 
             for (const [key, value] of Object.entries(display)) {
@@ -63,47 +66,50 @@ export function makeConfigCommand(): Command {
 
     cfg.command('get <key>')
         .description('Get a setting value')
-        .action(function(this: Command, key: string) {
-            const g = this.optsWithGlobals() as { configDir: string };
+        .action(function (this: Command, key: string) {
+            const g = this.optsWithGlobals();
             if (!VALID_KEYS.includes(key as SettingsKey)) {
                 logger.error(`Unknown key: "${key}". Valid keys: ${VALID_KEYS.join(', ')}`);
                 process.exit(1);
             }
-            const config = loadConfig(g.configDir);
+            const config = loadConfig(String(g.configDir));
             const value = config.settings[key as SettingsKey];
             console.log(value === null ? '' : String(value));
         });
 
     cfg.command('set <key> <value>')
         .description('Set a setting value')
-        .action(function(this: Command, key: string, value: string) {
-            const g = this.optsWithGlobals() as { configDir: string };
+        .action(function (this: Command, key: string, value: string) {
+            const g = this.optsWithGlobals();
             if (!VALID_KEYS.includes(key as SettingsKey)) {
                 logger.error(`Unknown key: "${key}". Valid keys: ${VALID_KEYS.join(', ')}`);
                 process.exit(1);
             }
             const err = validateValue(key as SettingsKey, value);
-            if (err) { logger.error(err); process.exit(1); }
+            if (err) {
+                logger.error(err);
+                process.exit(1);
+            }
 
-            const config = loadConfig(g.configDir);
+            const config = loadConfig(String(g.configDir));
             (config.settings as unknown as Record<string, string | null>)[key] = value === 'null' ? null : value;
-            saveConfig(config, g.configDir);
+            saveConfig(config, String(g.configDir));
             logger.success(`Set ${key} = ${value}`);
         });
 
     cfg.command('reset [key]')
         .description('Reset a key to its default value, or reset all settings')
-        .action(async function(this: Command, key?: string) {
-            const g = this.optsWithGlobals() as { configDir: string };
+        .action(async function (this: Command, key?: string) {
+            const g = this.optsWithGlobals();
 
             if (key) {
                 if (!VALID_KEYS.includes(key as SettingsKey)) {
                     logger.error(`Unknown key: "${key}". Valid keys: ${VALID_KEYS.join(', ')}`);
                     process.exit(1);
                 }
-                const config = loadConfig(g.configDir);
+                const config = loadConfig(String(g.configDir));
                 (config.settings as unknown as Record<string, string | null>)[key] = DEFAULTS[key as SettingsKey];
-                saveConfig(config, g.configDir);
+                saveConfig(config, String(g.configDir));
                 logger.success(`Reset ${key} to default.`);
                 return;
             }
@@ -111,13 +117,13 @@ export function makeConfigCommand(): Command {
             const { confirm } = await import('@inquirer/prompts');
             const ok = await confirm({ message: 'Reset ALL settings to defaults?', default: false });
             if (ok) {
-                const config = loadConfig(g.configDir);
+                const config = loadConfig(String(g.configDir));
                 config.settings.defaultImage = DEFAULT_IMAGE;
                 config.settings.defaultTag = DEFAULT_IMAGE_TAG;
                 config.settings.authMethod = null;
                 config.settings.gitUserName = null;
                 config.settings.gitUserEmail = null;
-                saveConfig(config, g.configDir);
+                saveConfig(config, String(g.configDir));
                 logger.success('All settings reset to defaults.');
             } else {
                 logger.info('Cancelled.');

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { type Command } from 'commander';
 import { buildGlobalFlags, promptConfigGet, promptConfigSet, promptConfigReset, promptMainMenu, runInteractiveMode } from './interactive.js';
 import { DEFAULT_CONFIG_DIR } from './constants.js';
 
@@ -15,7 +16,9 @@ vi.mock('@inquirer/prompts', () => ({
     Separator: class {
         readonly separator: string;
         readonly type = 'separator';
-        constructor(separator?: string) { this.separator = separator ?? '──────────'; }
+        constructor(separator?: string) {
+            this.separator = separator ?? '──────────';
+        }
     },
 }));
 
@@ -39,18 +42,16 @@ describe('buildGlobalFlags', () => {
     });
 
     it('returns all three flags when all are non-default', () => {
-        expect(buildGlobalFlags({ configDir: '/custom', workspace: '/proj', id: 'abc123' })).toEqual([
-            '--config-dir', '/custom',
-            '--workspace', '/proj',
-            '--id', 'abc123',
-        ]);
+        expect(buildGlobalFlags({ configDir: '/custom', workspace: '/proj', id: 'abc123' })).toEqual(['--config-dir', '/custom', '--workspace', '/proj', '--id', 'abc123']);
     });
 });
 
 // ─── promptConfigGet ──────────────────────────────────────────────────────────
 
 describe('promptConfigGet', () => {
-    beforeEach(() => { mockSelect.mockReset(); });
+    beforeEach(() => {
+        mockSelect.mockReset();
+    });
 
     it('returns ["config","get",key] for selected key', async () => {
         mockSelect.mockResolvedValueOnce('defaultTag');
@@ -61,7 +62,10 @@ describe('promptConfigGet', () => {
 // ─── promptConfigSet ──────────────────────────────────────────────────────────
 
 describe('promptConfigSet', () => {
-    beforeEach(() => { mockSelect.mockReset(); mockInput.mockReset(); });
+    beforeEach(() => {
+        mockSelect.mockReset();
+        mockInput.mockReset();
+    });
 
     it('returns ["config","set",key,value] for selected key and input value', async () => {
         mockSelect.mockResolvedValueOnce('defaultImage');
@@ -73,7 +77,9 @@ describe('promptConfigSet', () => {
 // ─── promptConfigReset ────────────────────────────────────────────────────────
 
 describe('promptConfigReset', () => {
-    beforeEach(() => { mockSelect.mockReset(); });
+    beforeEach(() => {
+        mockSelect.mockReset();
+    });
 
     it('returns ["config","reset"] when scope is all', async () => {
         mockSelect.mockResolvedValueOnce('all');
@@ -101,31 +107,33 @@ describe('promptMainMenu', () => {
 
     it("returns ['start'] for 'start'", async () => {
         mockSelect.mockResolvedValueOnce('start');
-        expect(await promptMainMenu(mockProgram as any)).toEqual(['start']);
+        expect(await promptMainMenu(mockProgram as unknown as Command)).toEqual(['start']);
     });
 
     it("returns ['auth', 'setup'] for 'auth-setup'", async () => {
         mockSelect.mockResolvedValueOnce('auth-setup');
-        expect(await promptMainMenu(mockProgram as any)).toEqual(['auth', 'setup']);
+        expect(await promptMainMenu(mockProgram as unknown as Command)).toEqual(['auth', 'setup']);
     });
 
     it("returns ['use', '--clear'] for 'use-clear'", async () => {
         mockSelect.mockResolvedValueOnce('use-clear');
-        expect(await promptMainMenu(mockProgram as any)).toEqual(['use', '--clear']);
+        expect(await promptMainMenu(mockProgram as unknown as Command)).toEqual(['use', '--clear']);
     });
 
     it('calls process.exit(0) for __exit__', async () => {
         const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
         mockSelect.mockResolvedValueOnce('__exit__');
-        await promptMainMenu(mockProgram as any);
+        await promptMainMenu(mockProgram as unknown as Command);
         expect(exitSpy).toHaveBeenCalledWith(0);
         exitSpy.mockRestore();
     });
 
     it('calls program.help() for __help__', async () => {
-        mockProgram.help.mockImplementation(() => { /* no-op */ });
+        mockProgram.help.mockImplementation(() => {
+            /* no-op */
+        });
         mockSelect.mockResolvedValueOnce('__help__');
-        await promptMainMenu(mockProgram as any);
+        await promptMainMenu(mockProgram as unknown as Command);
         expect(mockProgram.help).toHaveBeenCalled();
     });
 });
@@ -145,7 +153,7 @@ describe('runInteractiveMode', () => {
     it('calls program.help() and returns early when stdin is not a TTY', async () => {
         const origIsTTY = process.stdin.isTTY;
         Object.defineProperty(process.stdin, 'isTTY', { value: false, configurable: true });
-        await runInteractiveMode(mockProgram as any, { configDir: DEFAULT_CONFIG_DIR });
+        await runInteractiveMode(mockProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR });
         expect(mockProgram.help).toHaveBeenCalled();
         expect(mockProgram.parseAsync).not.toHaveBeenCalled();
         Object.defineProperty(process.stdin, 'isTTY', { value: origIsTTY, configurable: true });
@@ -157,7 +165,7 @@ describe('runInteractiveMode', () => {
         const err = new Error('User force closed the prompt');
         err.name = 'ExitPromptError';
         mockSelect.mockRejectedValueOnce(err);
-        await runInteractiveMode(mockProgram as any, { configDir: DEFAULT_CONFIG_DIR });
+        await runInteractiveMode(mockProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR });
         expect(exitSpy).toHaveBeenCalledWith(0);
         exitSpy.mockRestore();
     });
@@ -166,10 +174,8 @@ describe('runInteractiveMode', () => {
         Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
         const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
         mockProgram.parseAsync.mockResolvedValue(undefined);
-        mockSelect
-            .mockResolvedValueOnce('start')
-            .mockResolvedValueOnce('__exit__');
-        await runInteractiveMode(mockProgram as any, { configDir: DEFAULT_CONFIG_DIR });
+        mockSelect.mockResolvedValueOnce('start').mockResolvedValueOnce('__exit__');
+        await runInteractiveMode(mockProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR });
         expect(mockProgram.parseAsync).toHaveBeenCalledOnce();
         expect(mockProgram.parseAsync).toHaveBeenCalledWith(['start'], { from: 'user' });
         expect(exitSpy).toHaveBeenCalledWith(0);
@@ -182,9 +188,9 @@ describe('runInteractiveMode', () => {
         const cmdErr = Object.assign(new Error('Command exited with code 1'), { name: 'CommandExitError' });
         mockProgram.parseAsync.mockRejectedValueOnce(cmdErr);
         mockSelect
-            .mockResolvedValueOnce('start')   // first pick → command fails
+            .mockResolvedValueOnce('start') // first pick → command fails
             .mockResolvedValueOnce('__exit__'); // second pick → exit
-        await runInteractiveMode(mockProgram as any, { configDir: DEFAULT_CONFIG_DIR });
+        await runInteractiveMode(mockProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR });
         expect(mockProgram.parseAsync).toHaveBeenCalledOnce();
         expect(exitSpy).toHaveBeenCalledWith(0);
         exitSpy.mockRestore();
@@ -193,14 +199,12 @@ describe('runInteractiveMode', () => {
     it('redisplays the menu when BackError is thrown (ESC pressed)', async () => {
         Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
         const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
-        mockProgram.parseAsync
-            .mockRejectedValueOnce(Object.assign(new Error(), { name: 'BackError' }))
-            .mockResolvedValue(undefined);
+        mockProgram.parseAsync.mockRejectedValueOnce(Object.assign(new Error(), { name: 'BackError' })).mockResolvedValue(undefined);
         mockSelect
-            .mockResolvedValueOnce('start')  // first menu pick → parseAsync throws BackError
-            .mockResolvedValueOnce('start')  // second menu pick → parseAsync succeeds
+            .mockResolvedValueOnce('start') // first menu pick → parseAsync throws BackError
+            .mockResolvedValueOnce('start') // second menu pick → parseAsync succeeds
             .mockResolvedValueOnce('__exit__'); // third menu pick → exit
-        await runInteractiveMode(mockProgram as any, { configDir: DEFAULT_CONFIG_DIR });
+        await runInteractiveMode(mockProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR });
         expect(mockProgram.parseAsync).toHaveBeenCalledTimes(2);
         expect(exitSpy).toHaveBeenCalledWith(0);
         exitSpy.mockRestore();

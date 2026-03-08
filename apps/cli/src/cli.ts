@@ -13,7 +13,7 @@ import { makeUseCommand } from './commands/use.js';
 import { makeAuthCommand } from './commands/auth.js';
 import { makeConfigCommand } from './commands/config.js';
 import { DEFAULT_CONFIG_DIR, ENV_VARS } from './lib/constants.js';
-import { runInteractiveMode, type GlobalOpts } from './lib/interactive.js';
+import { runInteractiveMode } from './lib/interactive.js';
 
 // OS guard — Windows is not supported
 if (process.platform === 'win32') {
@@ -33,11 +33,7 @@ program
     .version(pkg.version, '-v, --version', 'Print version')
     .helpOption('-h, --help', 'Show help')
     // Global options available to all subcommands via this.optsWithGlobals()
-    .option(
-        '--config-dir <path>',
-        'Config directory',
-        process.env[ENV_VARS.CONFIG_DIR] ?? DEFAULT_CONFIG_DIR,
-    )
+    .option('--config-dir <path>', 'Config directory', process.env[ENV_VARS.CONFIG_DIR] ?? DEFAULT_CONFIG_DIR)
     .option('-w, --workspace <path>', 'Workspace directory (default: cwd)', process.env[ENV_VARS.WORKSPACE])
     .option('--id <id>', 'Target container by ID or short ID');
 
@@ -54,11 +50,11 @@ program.addCommand(makeUseCommand());
 program.addCommand(makeAuthCommand());
 program.addCommand(makeConfigCommand());
 
-program.action(async function(this: Command) {
+program.action(async function (this: Command) {
     if (this.args.length > 0) {
         this.error(`unknown command '${String(this.args[0])}'`);
     }
-    await runInteractiveMode(program, this.opts() as GlobalOpts);
+    await runInteractiveMode(program, this.opts());
 });
 
 program.parseAsync(process.argv).catch((err: unknown) => {

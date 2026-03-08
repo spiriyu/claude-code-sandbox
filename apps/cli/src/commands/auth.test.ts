@@ -142,9 +142,7 @@ describe('getStoredAuth', () => {
         });
 
         it('prefers ANTHROPIC_API_KEY when both keys appear in .env', () => {
-            vi.mocked(readFileSync).mockReturnValue(
-                'ANTHROPIC_API_KEY=sk-ant-api03-key\nCLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-tok\n',
-            );
+            vi.mocked(readFileSync).mockReturnValue('ANTHROPIC_API_KEY=sk-ant-api03-key\nCLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat01-tok\n');
             const result = getStoredAuth('/some/.env');
             expect(result).toHaveProperty('ANTHROPIC_API_KEY');
             expect(result).not.toHaveProperty('CLAUDE_CODE_OAUTH_TOKEN');
@@ -169,9 +167,7 @@ describe('getStoredAuth', () => {
         });
 
         it('skips lines without "=" (e.g., comments)', () => {
-            vi.mocked(readFileSync).mockReturnValue(
-                '# this is a comment\nANTHROPIC_API_KEY=sk-ant-api03-test\n',
-            );
+            vi.mocked(readFileSync).mockReturnValue('# this is a comment\nANTHROPIC_API_KEY=sk-ant-api03-test\n');
             const result = getStoredAuth('/some/.env');
             expect(result).toEqual({ ANTHROPIC_API_KEY: 'sk-ant-api03-test' });
         });

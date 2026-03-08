@@ -15,10 +15,7 @@ import { withEscBack } from './prompt-utils.js';
  *
  * Returns null if no container could be resolved.
  */
-export async function resolveContainer(
-    config: ConfigFile,
-    opts: { id?: string; workspace?: string },
-): Promise<ContainerRecord | null> {
+export async function resolveContainer(config: ConfigFile, opts: { id?: string; workspace?: string }): Promise<ContainerRecord | null> {
     // 1. --id flag
     if (opts.id) {
         const record = findContainerById(config, opts.id);
@@ -53,23 +50,26 @@ export async function resolveContainer(
 }
 
 /** Show an interactive container picker. Only used when there is genuine ambiguity. */
-export async function pickInteractively(
-    containers: ContainerRecord[],
-): Promise<ContainerRecord | null> {
+export async function pickInteractively(containers: ContainerRecord[]): Promise<ContainerRecord | null> {
     if (containers.length === 0) return null;
     if (containers.length === 1) return containers[0];
 
     const { select } = await import('@inquirer/prompts');
 
-    const chosen = await withEscBack(s => select<string>({
-        message: 'Select a container:',
-        choices: containers.map(c => ({
-            name: formatContainerLine(c),
-            value: c.id,
-        })),
-    }, { signal: s }));
+    const chosen = await withEscBack((s) =>
+        select<string>(
+            {
+                message: 'Select a container:',
+                choices: containers.map((c) => ({
+                    name: formatContainerLine(c),
+                    value: c.id,
+                })),
+            },
+            { signal: s }
+        )
+    );
 
-    return containers.find(c => c.id === chosen) ?? null;
+    return containers.find((c) => c.id === chosen) ?? null;
 }
 
 export function formatContainerLine(c: ContainerRecord): string {

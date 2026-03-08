@@ -1,13 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-    DEFAULT_IMAGE_TAG,
-    DEFAULT_IMAGE,
-    CONTAINER_NAME_PREFIX,
-    DEFAULT_NODE_VERSION,
-    DEFAULT_PYTHON_VERSION,
-    AUTH_METHODS,
-    TOKEN_PREFIXES,
-} from './constants.js';
+import { DEFAULT_IMAGE_TAG, DEFAULT_IMAGE, CONTAINER_NAME_PREFIX, DEFAULT_NODE_VERSION, DEFAULT_PYTHON_VERSION, AUTH_METHODS, TOKEN_PREFIXES } from './constants.js';
 
 describe('constants', () => {
     it('has correct default image tag', () => {

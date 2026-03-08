@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
+import { writeFileSync } from 'fs';
 import { loadConfig, saveConfig } from './config-store.js';
 
 // Use a unique temp dir per test run so tests don't share state
@@ -53,7 +54,6 @@ describe('config-store', () => {
         const config = loadConfig(configDir);
         saveConfig(config, configDir);
 
-        const { writeFileSync } = require('fs');
         writeFileSync(join(configDir, 'config.json'), 'not valid json');
 
         const loaded = loadConfig(configDir);

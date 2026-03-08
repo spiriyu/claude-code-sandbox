@@ -1,13 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import {
-    getAllContainers,
-    findContainerById,
-    findContainersByWorkspace,
-    addContainer,
-    updateContainer,
-    markContainerRemoved,
-    syncContainerStatuses,
-} from './container-store.js';
+import { describe, it, expect } from 'vitest';
+import { getAllContainers, findContainerById, findContainersByWorkspace, addContainer, updateContainer, markContainerRemoved, syncContainerStatuses } from './container-store.js';
 import { type ConfigFile, type ContainerRecord } from './config-store.js';
 
 function record(overrides: Partial<ContainerRecord> = {}): ContainerRecord {
@@ -47,20 +39,14 @@ describe('getAllContainers', () => {
     });
 
     it('returns only non-removed containers by default', () => {
-        const cfg = configWith([
-            record({ id: 'aaa-1', name: 'n1' }),
-            record({ id: 'bbb-2', name: 'n2', removedAt: '2024-01-02T00:00:00.000Z', lastStatus: 'removed' }),
-        ]);
+        const cfg = configWith([record({ id: 'aaa-1', name: 'n1' }), record({ id: 'bbb-2', name: 'n2', removedAt: '2024-01-02T00:00:00.000Z', lastStatus: 'removed' })]);
         const result = getAllContainers(cfg);
         expect(result).toHaveLength(1);
         expect(result[0].id).toBe('aaa-1');
     });
 
     it('returns all containers when includeRemoved=true', () => {
-        const cfg = configWith([
-            record({ id: 'aaa-1', name: 'n1' }),
-            record({ id: 'bbb-2', name: 'n2', removedAt: '2024-01-02T00:00:00.000Z', lastStatus: 'removed' }),
-        ]);
+        const cfg = configWith([record({ id: 'aaa-1', name: 'n1' }), record({ id: 'bbb-2', name: 'n2', removedAt: '2024-01-02T00:00:00.000Z', lastStatus: 'removed' })]);
         expect(getAllContainers(cfg, true)).toHaveLength(2);
     });
 });
@@ -95,10 +81,7 @@ describe('findContainerById', () => {
         // Two containers whose UUIDs both start with 'a1b2c3d4'
         const id1 = 'a1b2c3d4-1111-1111-1111-111111111111';
         const id2 = 'a1b2c3d4-2222-2222-2222-222222222222';
-        const cfg2 = configWith([
-            record({ id: id1, name: 'n1' }),
-            record({ id: id2, name: 'n2' }),
-        ]);
+        const cfg2 = configWith([record({ id: id1, name: 'n1' }), record({ id: id2, name: 'n2' })]);
         const found = findContainerById(cfg2, 'a1b2c3d4');
         // Must find one of them (not undefined)
         expect(found).toBeDefined();
@@ -122,17 +105,12 @@ describe('findContainersByWorkspace', () => {
     });
 
     it('does not return removed containers', () => {
-        const cfg = configWith([
-            record({ id: 'r1', name: 'n1', workspace: ws, removedAt: '2024-01-01T00:00:00.000Z' }),
-        ]);
+        const cfg = configWith([record({ id: 'r1', name: 'n1', workspace: ws, removedAt: '2024-01-01T00:00:00.000Z' })]);
         expect(findContainersByWorkspace(cfg, ws)).toHaveLength(0);
     });
 
     it('returns multiple containers for same workspace', () => {
-        const cfg = configWith([
-            record({ id: 'r1', name: 'n1', workspace: ws }),
-            record({ id: 'r2', name: 'n2', workspace: ws }),
-        ]);
+        const cfg = configWith([record({ id: 'r1', name: 'n1', workspace: ws }), record({ id: 'r2', name: 'n2', workspace: ws })]);
         expect(findContainersByWorkspace(cfg, ws)).toHaveLength(2);
     });
 
@@ -244,9 +222,7 @@ describe('syncContainerStatuses', () => {
     });
 
     it('does not update removed containers', () => {
-        const cfg = configWith([
-            record({ removedAt: '2024-01-01T00:00:00.000Z', lastStatus: 'removed' }),
-        ]);
+        const cfg = configWith([record({ removedAt: '2024-01-01T00:00:00.000Z', lastStatus: 'removed' })]);
         syncContainerStatuses(cfg, new Map([['claude-code-sandbox-a1b2c3d4', 'running']]));
         // lastStatus should remain 'removed'
         expect(cfg.containers['a1b2c3d4-e5f6-7890-abcd-ef1234567890'].lastStatus).toBe('removed');

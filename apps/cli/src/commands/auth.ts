@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { writeFileSync, chmodSync, existsSync, readFileSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
-import { homedir } from 'os';
 import { logger } from '../utils/logger.js';
 import { loadConfig, saveConfig } from '../lib/config-store.js';
 import { TOKEN_PREFIXES, AUTH_METHODS, DEFAULT_CONFIG_DIR, type AuthMethod } from '../lib/constants.js';
@@ -57,13 +56,18 @@ async function runAuthWizard(configDir: string): Promise<void> {
     console.log('  You can use either an API Key or an OAuth Token.');
     console.log();
 
-    const method = await withEscBack(s => select<AuthMethod>({
-        message: 'Which authentication method?',
-        choices: [
-            { name: 'API Key  (from console.anthropic.com — pay per token)', value: AUTH_METHODS.API_KEY },
-            { name: 'OAuth Token  (from Claude Pro/Max — run: claude setup-token)', value: AUTH_METHODS.OAUTH_TOKEN },
-        ],
-    }, { signal: s }));
+    const method = await withEscBack((s) =>
+        select<AuthMethod>(
+            {
+                message: 'Which authentication method?',
+                choices: [
+                    { name: 'API Key  (from console.anthropic.com — pay per token)', value: AUTH_METHODS.API_KEY },
+                    { name: 'OAuth Token  (from Claude Pro/Max — run: claude setup-token)', value: AUTH_METHODS.OAUTH_TOKEN },
+                ],
+            },
+            { signal: s }
+        )
+    );
 
     logger.blank();
 
@@ -81,9 +85,12 @@ async function runAuthWizard(configDir: string): Promise<void> {
     console.log();
 
     const envKey = method === AUTH_METHODS.API_KEY ? 'ANTHROPIC_API_KEY' : 'CLAUDE_CODE_OAUTH_TOKEN';
-    const token = await withEscBack(s => password({ message: `Paste your ${envKey}:`, mask: '*' }, { signal: s }));
+    const token = await withEscBack((s) => password({ message: `Paste your ${envKey}:`, mask: '*' }, { signal: s }));
 
-    if (!token) { logger.error('No token provided.'); process.exit(1); }
+    if (!token) {
+        logger.error('No token provided.');
+        process.exit(1);
+    }
 
     if (!validateToken(token, method)) {
         logger.warn(`Token doesn't look right. Expected prefix: ${TOKEN_PREFIXES[method]}`);
@@ -92,13 +99,18 @@ async function runAuthWizard(configDir: string): Promise<void> {
 
     logger.blank();
 
-    const storage = await withEscBack(s => select({
-        message: 'How should the credential be stored?',
-        choices: [
-            { name: `Save to ${envFilePath}  (persistent, recommended)`, value: 'file' },
-            { name: 'Show export command only  (you handle storage)', value: 'show' },
-        ],
-    }, { signal: s }));
+    const storage = await withEscBack((s) =>
+        select(
+            {
+                message: 'How should the credential be stored?',
+                choices: [
+                    { name: `Save to ${envFilePath}  (persistent, recommended)`, value: 'file' },
+                    { name: 'Show export command only  (you handle storage)', value: 'show' },
+                ],
+            },
+            { signal: s }
+        )
+    );
 
     if (storage === 'file') {
         mkdirSync(dirname(envFilePath), { recursive: true });
@@ -151,25 +163,23 @@ async function showAuthStatus(configDir: string): Promise<void> {
 }
 
 export function makeAuthCommand(): Command {
-    const auth = new Command('auth')
-        .description('Configure Claude credentials for the sandbox')
-        .action(async function(this: Command) {
-            const g = this.optsWithGlobals() as { configDir: string };
-            await runAuthWizard(g.configDir);
-        });
+    const auth = new Command('auth').description('Configure Claude credentials for the sandbox').action(async function (this: Command) {
+        const g = this.optsWithGlobals();
+        await runAuthWizard(String(g.configDir));
+    });
 
     auth.command('setup')
         .description('Interactive credential setup wizard')
-        .action(async function(this: Command) {
-            const g = this.optsWithGlobals() as { configDir: string };
-            await runAuthWizard(g.configDir);
+        .action(async function (this: Command) {
+            const g = this.optsWithGlobals();
+            await runAuthWizard(String(g.configDir));
         });
 
     auth.command('status')
         .description('Show current authentication status')
-        .action(async function(this: Command) {
-            const g = this.optsWithGlobals() as { configDir: string };
-            await showAuthStatus(g.configDir);
+        .action(async function (this: Command) {
+            const g = this.optsWithGlobals();
+            await showAuthStatus(String(g.configDir));
         });
 
     return auth;

@@ -16,9 +16,7 @@ export class BackError extends Error {
  * Usage:
  *   const answer = await withEscBack(s => select({ message: '...' }, { signal: s }));
  */
-export async function withEscBack<T>(
-    promptFn: (signal: AbortSignal) => Promise<T>,
-): Promise<T> {
+export async function withEscBack<T>(promptFn: (signal: AbortSignal) => Promise<T>): Promise<T> {
     emitKeypressEvents(process.stdin);
     const ac = new AbortController();
 

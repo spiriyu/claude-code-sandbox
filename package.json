@@ -22,7 +22,8 @@
         "format": "prettier --write \"**/*.{ts,js,json,md}\" --ignore-path .prettierignore",
         "format:check": "prettier --check \"**/*.{ts,js,json,md}\" --ignore-path .prettierignore",
         "release": "node scripts/release.js",
-        "release:dry-run": "node scripts/release.js --dry-run"
+        "release:dry-run": "node scripts/release.js --dry-run",
+        "release:skip": "node scripts/release.js --skip-checks"
     },
     "devDependencies": {
         "eslint": "^9.39.3",

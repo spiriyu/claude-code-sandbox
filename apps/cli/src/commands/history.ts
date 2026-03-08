@@ -9,10 +9,10 @@ export function makeHistoryCommand(): Command {
     return new Command('history')
         .description('List all containers including removed ones')
         .option('--json', 'Output as JSON')
-        .action(function(this: Command, opts: { json?: boolean }) {
-            const g = this.optsWithGlobals() as { configDir: string };
+        .action(function (this: Command, opts: { json?: boolean }) {
+            const g = this.optsWithGlobals();
 
-            const config = loadConfig(g.configDir);
+            const config = loadConfig(String(g.configDir));
             const all = getAllContainers(config, true);
 
             if (opts.json) {
@@ -29,12 +29,12 @@ export function makeHistoryCommand(): Command {
 
             console.log(
                 '  ' +
-                '  '.padEnd(2) +
-                chalk.bold('ID'.padEnd(10)) +
-                chalk.bold('WORKSPACE'.padEnd(38)) +
-                chalk.bold('STATUS'.padEnd(12)) +
-                chalk.bold('CREATED'.padEnd(14)) +
-                chalk.bold('REMOVED'),
+                    '  '.padEnd(2) +
+                    chalk.bold('ID'.padEnd(10)) +
+                    chalk.bold('WORKSPACE'.padEnd(38)) +
+                    chalk.bold('STATUS'.padEnd(12)) +
+                    chalk.bold('CREATED'.padEnd(14)) +
+                    chalk.bold('REMOVED')
             );
             console.log('  ' + chalk.gray('─'.repeat(90)));
 
@@ -52,11 +52,16 @@ export function makeHistoryCommand(): Command {
 
 function colorStatus(status: string): string {
     switch (status) {
-        case 'running': return chalk.green(status);
-        case 'exited': return chalk.yellow(status);
-        case 'paused': return chalk.blue(status);
+        case 'running':
+            return chalk.green(status);
+        case 'exited':
+            return chalk.yellow(status);
+        case 'paused':
+            return chalk.blue(status);
         case 'dead':
-        case 'unknown': return chalk.red(status);
-        default: return chalk.gray(status);
+        case 'unknown':
+            return chalk.red(status);
+        default:
+            return chalk.gray(status);
     }
 }

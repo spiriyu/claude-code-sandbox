@@ -9,19 +9,19 @@ export function makeRemoveCommand(): Command {
     return new Command('remove')
         .description('Remove a container from Docker (stop if running, preserve in history)')
         .option('-f, --force', 'Skip confirmation prompt')
-        .action(async function(this: Command, opts: { force?: boolean }) {
-            const g = this.optsWithGlobals() as { configDir: string; workspace?: string; id?: string };
+        .action(async function (this: Command, opts: { force?: boolean }) {
+            const g = this.optsWithGlobals();
 
-            if (!await isDockerRunning()) {
+            if (!(await isDockerRunning())) {
                 logger.error('Docker is not running or not accessible.');
                 process.exit(1);
             }
 
-            const config = loadConfig(g.configDir);
-            const allNames = getAllContainers(config).map(c => c.name);
+            const config = loadConfig(String(g.configDir));
+            const allNames = getAllContainers(config).map((c) => c.name);
             syncContainerStatuses(config, await getContainerStates(allNames));
 
-            const container = await resolveContainer(config, { id: g.id, workspace: g.workspace });
+            const container = await resolveContainer(config, { id: g.id as string | undefined, workspace: g.workspace as string | undefined });
             if (!container) {
                 logger.error('No container found. Run `claude-code-sandbox ls` to see available containers.');
                 process.exit(1);
@@ -33,7 +33,10 @@ export function makeRemoveCommand(): Command {
                     message: `Remove container ${shortId(container.id)} (${container.workspace})?`,
                     default: false,
                 });
-                if (!ok) { logger.info('Cancelled.'); return; }
+                if (!ok) {
+                    logger.info('Cancelled.');
+                    return;
+                }
             }
 
             // Stop first if running
@@ -59,7 +62,7 @@ export function makeRemoveCommand(): Command {
                     config.settings.currentContainerId = null;
                 }
 
-                saveConfig(config, g.configDir);
+                saveConfig(config, String(g.configDir));
                 spin.succeed(`Container ${shortId(container.id)} removed`);
                 console.log('  Run `claude-code-sandbox history` to view removed containers.');
                 console.log('  Run `claude-code-sandbox start` to create a new one for this workspace.');

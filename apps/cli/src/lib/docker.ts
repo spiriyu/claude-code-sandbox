@@ -20,9 +20,7 @@ export async function isDockerRunning(): Promise<boolean> {
 }
 
 /** Query Docker for the current state of a set of container names. */
-export async function getContainerStates(
-    names: string[],
-): Promise<Map<string, ContainerStatus>> {
+export async function getContainerStates(names: string[]): Promise<Map<string, ContainerStatus>> {
     const result = new Map<string, ContainerStatus>();
     if (names.length === 0) return result;
 
@@ -65,21 +63,17 @@ export async function imageExistsLocally(image: string, tag: string): Promise<bo
     }
 }
 
-export async function pullImage(
-    image: string,
-    tag: string,
-    onStatus?: (msg: string) => void,
-): Promise<void> {
+export async function pullImage(image: string, tag: string, onStatus?: (msg: string) => void): Promise<void> {
     const docker = getDockerClient();
     await new Promise<void>((resolve, reject) => {
-        docker.pull(`${image}:${tag}`, (err: Error | null, stream: NodeJS.ReadableStream) => {
+        void docker.pull(`${image}:${tag}`, (err: Error | null, stream: NodeJS.ReadableStream) => {
             if (err) return reject(err);
             docker.modem.followProgress(
                 stream,
                 (err: Error | null) => (err ? reject(err) : resolve()),
                 (event: { status?: string }) => {
                     if (onStatus && event.status) onStatus(event.status);
-                },
+                }
             );
         });
     });
@@ -117,10 +111,7 @@ export async function createAndStartContainer(opts: CreateContainerOptions): Pro
             ...(opts.gitUserEmail ? [`${GIT_ENV_VARS.USER_EMAIL}=${opts.gitUserEmail}`] : []),
         ],
         HostConfig: {
-            Binds: [
-                `${opts.workspace}:${WORKSPACE_MOUNT_PATH}`,
-                `${opts.claudeDir}:${CLAUDE_DIR_CONTAINER_PATH}`,
-            ],
+            Binds: [`${opts.workspace}:${WORKSPACE_MOUNT_PATH}`, `${opts.claudeDir}:${CLAUDE_DIR_CONTAINER_PATH}`],
             AutoRemove: false,
         },
     });
@@ -146,14 +137,11 @@ export async function attachToContainer(name: string): Promise<void> {
     const container = docker.getContainer(name);
 
     const stream = await new Promise<NodeJS.ReadWriteStream>((resolve, reject) => {
-        container.attach(
-            { stream: true, stdin: true, stdout: true, stderr: true, hijack: true },
-            (err: Error | null, s?: NodeJS.ReadWriteStream) => {
-                if (err) return reject(err);
-                if (!s) return reject(new Error('attach returned no stream'));
-                resolve(s);
-            },
-        );
+        container.attach({ stream: true, stdin: true, stdout: true, stderr: true, hijack: true }, (err: Error | null, s?: NodeJS.ReadWriteStream) => {
+            if (err) return reject(err);
+            if (!s) return reject(new Error('attach returned no stream'));
+            resolve(s);
+        });
     });
 
     if (process.stdin.isTTY) {
@@ -172,7 +160,7 @@ export async function attachToContainer(name: string): Promise<void> {
     process.stdin.pipe(stream);
     stream.pipe(process.stdout);
 
-    await new Promise<void>(resolve => stream.once('end', resolve));
+    await new Promise<void>((resolve) => stream.once('end', resolve));
 
     process.stdin.unpipe(stream);
     if (process.stdin.isTTY) process.stdin.setRawMode(false);
@@ -206,7 +194,7 @@ export async function execShellInContainer(name: string): Promise<void> {
     process.stdin.pipe(stream);
     stream.pipe(process.stdout);
 
-    await new Promise<void>(resolve => stream.once('end', resolve));
+    await new Promise<void>((resolve) => stream.once('end', resolve));
 
     process.stdin.unpipe(stream);
     if (process.stdin.isTTY) process.stdin.setRawMode(false);

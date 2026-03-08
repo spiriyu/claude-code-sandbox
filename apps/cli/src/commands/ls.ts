@@ -9,19 +9,19 @@ export function makeLsCommand(): Command {
     return new Command('ls')
         .description('List all active containers')
         .option('--json', 'Output as JSON')
-        .action(async function(this: Command, opts: { json?: boolean }) {
-            const g = this.optsWithGlobals() as { configDir: string };
+        .action(async function (this: Command, opts: { json?: boolean }) {
+            const g = this.optsWithGlobals();
 
-            if (!await isDockerRunning()) {
+            if (!(await isDockerRunning())) {
                 logger.error('Docker is not running or not accessible.');
                 process.exit(1);
             }
 
-            const config = loadConfig(g.configDir);
+            const config = loadConfig(String(g.configDir));
             const containers = getAllContainers(config, false);
-            const names = containers.map(c => c.name);
+            const names = containers.map((c) => c.name);
             syncContainerStatuses(config, await getContainerStates(names));
-            saveConfig(config, g.configDir);
+            saveConfig(config, String(g.configDir));
 
             const active = getAllContainers(config, false);
 
@@ -40,12 +40,12 @@ export function makeLsCommand(): Command {
             // Header
             console.log(
                 '  ' +
-                '  '.padEnd(2) +
-                chalk.bold('ID'.padEnd(10)) +
-                chalk.bold('WORKSPACE'.padEnd(38)) +
-                chalk.bold('STATUS'.padEnd(12)) +
-                chalk.bold('IMAGE:TAG'.padEnd(36)) +
-                chalk.bold('CREATED'),
+                    '  '.padEnd(2) +
+                    chalk.bold('ID'.padEnd(10)) +
+                    chalk.bold('WORKSPACE'.padEnd(38)) +
+                    chalk.bold('STATUS'.padEnd(12)) +
+                    chalk.bold('IMAGE:TAG'.padEnd(36)) +
+                    chalk.bold('CREATED')
             );
             console.log('  ' + chalk.gray('─'.repeat(105)));
 
@@ -63,11 +63,16 @@ export function makeLsCommand(): Command {
 
 function colorStatus(status: string): string {
     switch (status) {
-        case 'running': return chalk.green(status);
-        case 'exited': return chalk.yellow(status);
-        case 'paused': return chalk.blue(status);
+        case 'running':
+            return chalk.green(status);
+        case 'exited':
+            return chalk.yellow(status);
+        case 'paused':
+            return chalk.blue(status);
         case 'dead':
-        case 'unknown': return chalk.red(status);
-        default: return chalk.gray(status);
+        case 'unknown':
+            return chalk.red(status);
+        default:
+            return chalk.gray(status);
     }
 }

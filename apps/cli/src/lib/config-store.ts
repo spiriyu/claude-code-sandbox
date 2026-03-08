@@ -2,14 +2,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { join } from 'path';
 import { DEFAULT_IMAGE, DEFAULT_IMAGE_TAG } from './constants.js';
 
-export type ContainerStatus =
-    | 'created'
-    | 'running'
-    | 'paused'
-    | 'exited'
-    | 'dead'
-    | 'removed'
-    | 'unknown';
+export type ContainerStatus = 'created' | 'running' | 'paused' | 'exited' | 'dead' | 'removed' | 'unknown';
 
 export interface ContainerRecord {
     id: string;

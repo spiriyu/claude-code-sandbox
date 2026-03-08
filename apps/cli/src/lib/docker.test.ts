@@ -1,11 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-    formatRelativeTime,
-    shortId,
-    containerNameFromId,
-    mapDockerState,
-    getContainerStates,
-} from './docker.js';
+import { formatRelativeTime, shortId, containerNameFromId, mapDockerState, getContainerStates } from './docker.js';
 
 // ─── Mock dockerode ───────────────────────────────────────────────────────────
 // vi.hoisted ensures dockerMock is available when the vi.mock factory runs.
@@ -120,17 +114,13 @@ describe('getContainerStates', () => {
     });
 
     it('returns matching container with correct status', async () => {
-        dockerMock.listContainers.mockResolvedValue([
-            { Names: ['/claude-code-sandbox-a1b2c3d4'], State: 'running' },
-        ]);
+        dockerMock.listContainers.mockResolvedValue([{ Names: ['/claude-code-sandbox-a1b2c3d4'], State: 'running' }]);
         const result = await getContainerStates(['claude-code-sandbox-a1b2c3d4']);
         expect(result.get('claude-code-sandbox-a1b2c3d4')).toBe('running');
     });
 
     it('strips the leading slash from Docker container names', async () => {
-        dockerMock.listContainers.mockResolvedValue([
-            { Names: ['/claude-code-sandbox-a1b2c3d4'], State: 'exited' },
-        ]);
+        dockerMock.listContainers.mockResolvedValue([{ Names: ['/claude-code-sandbox-a1b2c3d4'], State: 'exited' }]);
         const result = await getContainerStates(['claude-code-sandbox-a1b2c3d4']);
         expect(result.has('claude-code-sandbox-a1b2c3d4')).toBe(true);
         expect(result.has('/claude-code-sandbox-a1b2c3d4')).toBe(false);
@@ -147,9 +137,7 @@ describe('getContainerStates', () => {
     });
 
     it('returns empty map when none of the requested names exist in Docker', async () => {
-        dockerMock.listContainers.mockResolvedValue([
-            { Names: ['/unrelated-container'], State: 'running' },
-        ]);
+        dockerMock.listContainers.mockResolvedValue([{ Names: ['/unrelated-container'], State: 'running' }]);
         const result = await getContainerStates(['claude-code-sandbox-a1b2c3d4']);
         expect(result.size).toBe(0);
     });
@@ -159,10 +147,7 @@ describe('getContainerStates', () => {
             { Names: ['/claude-code-sandbox-a1b2c3d4'], State: 'running' },
             { Names: ['/claude-code-sandbox-b2b2b2b2'], State: 'paused' },
         ]);
-        const result = await getContainerStates([
-            'claude-code-sandbox-a1b2c3d4',
-            'claude-code-sandbox-b2b2b2b2',
-        ]);
+        const result = await getContainerStates(['claude-code-sandbox-a1b2c3d4', 'claude-code-sandbox-b2b2b2b2']);
         expect(result.get('claude-code-sandbox-a1b2c3d4')).toBe('running');
         expect(result.get('claude-code-sandbox-b2b2b2b2')).toBe('paused');
     });

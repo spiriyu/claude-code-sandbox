@@ -10,23 +10,23 @@ export function makeUseCommand(): Command {
         .description('Select the active container (persists until changed or cleared)')
         .argument('[id]', 'Container ID to select directly')
         .option('--clear', 'Clear the current selection')
-        .action(async function(this: Command, idArg?: string, opts?: { clear?: boolean }) {
-            const g = this.optsWithGlobals() as { configDir: string };
+        .action(async function (this: Command, idArg?: string, opts?: { clear?: boolean }) {
+            const g = this.optsWithGlobals();
 
             if (opts?.clear) {
-                const config = loadConfig(g.configDir);
+                const config = loadConfig(String(g.configDir));
                 config.settings.currentContainerId = null;
-                saveConfig(config, g.configDir);
+                saveConfig(config, String(g.configDir));
                 logger.success('Container selection cleared.');
                 return;
             }
 
-            if (!await isDockerRunning()) {
+            if (!(await isDockerRunning())) {
                 logger.error('Docker is not running or not accessible.');
                 process.exit(1);
             }
 
-            const config = loadConfig(g.configDir);
+            const config = loadConfig(String(g.configDir));
 
             // Get all non-removed containers from config
             const candidates = getAllContainers(config, false);
@@ -36,11 +36,11 @@ export function makeUseCommand(): Command {
             }
 
             // Filter to only containers that actually exist in Docker
-            const names = candidates.map(c => c.name);
+            const names = candidates.map((c) => c.name);
             const dockerStates = await getContainerStates(names);
             syncContainerStatuses(config, dockerStates);
 
-            const dockerVerified = candidates.filter(c => dockerStates.has(c.name));
+            const dockerVerified = candidates.filter((c) => dockerStates.has(c.name));
 
             if (dockerVerified.length === 0) {
                 logger.error('No containers found in Docker. They may have been removed externally.');
@@ -65,12 +65,15 @@ export function makeUseCommand(): Command {
             } else if (dockerVerified.length > 1) {
                 // Interactive picker
                 const picked = await pickInteractively(dockerVerified);
-                if (!picked) { logger.info('No container selected.'); return; }
+                if (!picked) {
+                    logger.info('No container selected.');
+                    return;
+                }
                 chosen = picked;
             }
 
             config.settings.currentContainerId = chosen.id;
-            saveConfig(config, g.configDir);
+            saveConfig(config, String(g.configDir));
             logger.success(`Now using container ${shortId(chosen.id)}`);
             console.log(`  Workspace: ${chosen.workspace}`);
             console.log(`  Status:    ${chosen.lastStatus}`);
