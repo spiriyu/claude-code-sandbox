@@ -93,7 +93,7 @@ on:
 4. `npm run cli:test` — must pass
 5. `npm run cli:build` — tsup build
 6. Set version in `apps/cli/package.json` from tag
-7. `npm publish --access public` using `NPM_TOKEN` secret
+7. `npm publish --access public --provenance` via Trusted Publishing (OIDC)
 8. Create GitHub Release "CLI vX.Y.Z"
 
 ## Required GitHub Secrets
@@ -104,9 +104,10 @@ Set in: GitHub repo → Settings → Secrets and variables → Actions → New r
 | -------------------- | -------------------- | ------------------------------------------------------------------------------------------ |
 | `DOCKERHUB_USERNAME` | `docker-publish.yml` | Your Docker Hub username (`spiriyu`)                                                       |
 | `DOCKERHUB_TOKEN`    | `docker-publish.yml` | Docker Hub → Account Settings → Personal access tokens → Generate new token (Read & Write) |
-| `NPM_TOKEN`          | `cli-publish.yml`    | npmjs.com → avatar → Access Tokens → Generate New Token → **Automation** type              |
 
 `GITHUB_TOKEN` (used for GitHub Release creation) is provided automatically — no setup needed.
+
+`cli-publish.yml` uses [npm Trusted Publishing](https://docs.npmjs.com/generating-provenance-statements#publishing-packages-with-provenance-via-github-actions) (OIDC) — no npm token secret is needed. The workflow's `id-token: write` permission allows it to authenticate directly with npm.
 
 ## Build Matrix (Docker)
 

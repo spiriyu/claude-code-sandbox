@@ -100,11 +100,11 @@ Set in: GitHub repo → Settings → Secrets and variables → Actions → New r
 | `DOCKERHUB_USERNAME` | Your Docker Hub username (`spiriyu`)                                                       |
 | `DOCKERHUB_TOKEN`    | Docker Hub → Account Settings → Personal access tokens → Generate new token (Read & Write) |
 
-### npm secret
+### npm (Trusted Publishing)
 
-| Secret      | Value                                                                         |
-| ----------- | ----------------------------------------------------------------------------- |
-| `NPM_TOKEN` | npmjs.com → avatar → Access Tokens → Generate New Token → **Automation** type |
+No secret needed — the CLI publish workflow uses [npm Trusted Publishing](https://docs.npmjs.com/generating-provenance-statements#publishing-packages-with-provenance-via-github-actions) via OpenID Connect (OIDC). The workflow requests an `id-token` from GitHub Actions and exchanges it with npm automatically.
+
+**Setup (already done):** Link the GitHub repo to the npm package on npmjs.com → Package Settings → Publishing access → Trusted Publishing.
 
 ### Local git setup
 
