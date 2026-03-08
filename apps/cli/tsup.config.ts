@@ -10,7 +10,9 @@ export default defineConfig({
     sourcemap: true,
     noExternal: ['@claude-code-sandbox/shared'],
     banner: {
-        js: '#!/usr/bin/env node',
+        js: `#!/usr/bin/env node
+import { createRequire as __cjs_createRequire } from 'module';
+const require = __cjs_createRequire(import.meta.url);`,
     },
     esbuildOptions(options) {
         options.alias = {
