@@ -21,9 +21,7 @@ export function makeCleanupCommand(): Command {
             }
 
             const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-            const removed = getAllContainers(config, true).filter(
-                (c) => c.removedAt !== null && new Date(c.removedAt).getTime() < cutoff
-            );
+            const removed = getAllContainers(config, true).filter((c) => c.removedAt !== null && new Date(c.removedAt).getTime() < cutoff);
 
             if (removed.length === 0) {
                 logger.info(`No removed containers older than ${days} days found.`);

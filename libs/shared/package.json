@@ -9,6 +9,7 @@
     },
     "scripts": {
         "lint": "eslint src",
+        "lint:fix": "eslint src --fix",
         "type-check": "tsc --noEmit"
     },
     "devDependencies": {

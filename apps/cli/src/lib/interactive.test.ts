@@ -1,6 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { type Command } from 'commander';
-import { buildGlobalFlags, promptConfigGet, promptConfigSet, promptConfigReset, promptMainMenu, promptContainerSelect, CONTAINER_UNSET, runInteractiveMode, startWizard, type StartWizardResult } from './interactive.js';
+import {
+    buildGlobalFlags,
+    promptConfigGet,
+    promptConfigSet,
+    promptConfigReset,
+    promptMainMenu,
+    promptContainerSelect,
+    CONTAINER_UNSET,
+    runInteractiveMode,
+    startWizard,
+    type StartWizardResult,
+} from './interactive.js';
 import { DEFAULT_CONFIG_DIR } from './constants.js';
 import { type ConfigFile } from './config-store.js';
 
@@ -177,7 +188,11 @@ describe('promptMainMenu', () => {
 // ─── promptContainerSelect ────────────────────────────────────────────────────
 
 describe('promptContainerSelect', () => {
-    const emptyConfig: ConfigFile = { version: 1, containers: {}, settings: { defaultImage: '', defaultTag: '', authMethod: null, currentContainerId: null, gitUserName: null, gitUserEmail: null, cleanupDays: 10 } };
+    const emptyConfig: ConfigFile = {
+        version: 1,
+        containers: {},
+        settings: { defaultImage: '', defaultTag: '', authMethod: null, currentContainerId: null, gitUserName: null, gitUserEmail: null, cleanupDays: 10 },
+    };
 
     beforeEach(() => {
         mockSelect.mockReset();
@@ -214,9 +229,9 @@ describe('startWizard', () => {
     });
 
     it('returns workspace, image, and tag for latest selection', async () => {
-        mockInput.mockResolvedValueOnce('/tmp');       // workspace
-        mockSelect.mockResolvedValueOnce('latest');    // image tag
-        mockConfirm.mockResolvedValueOnce(true);       // confirm
+        mockInput.mockResolvedValueOnce('/tmp'); // workspace
+        mockSelect.mockResolvedValueOnce('latest'); // image tag
+        mockConfirm.mockResolvedValueOnce(true); // confirm
 
         const result = await startWizard('/tmp', defaultSettings);
         expect(result).toEqual({
@@ -227,11 +242,11 @@ describe('startWizard', () => {
     });
 
     it('returns custom tag with node and python selections', async () => {
-        mockInput.mockResolvedValueOnce('/tmp');         // workspace
-        mockSelect.mockResolvedValueOnce('__custom__');  // custom image
-        mockSelect.mockResolvedValueOnce('22');          // node 22
-        mockSelect.mockResolvedValueOnce('3.12');        // python 3.12
-        mockConfirm.mockResolvedValueOnce(true);         // confirm
+        mockInput.mockResolvedValueOnce('/tmp'); // workspace
+        mockSelect.mockResolvedValueOnce('__custom__'); // custom image
+        mockSelect.mockResolvedValueOnce('22'); // node 22
+        mockSelect.mockResolvedValueOnce('3.12'); // python 3.12
+        mockConfirm.mockResolvedValueOnce(true); // confirm
 
         const result = await startWizard('/tmp', defaultSettings);
         expect(result).not.toBeNull();
@@ -241,9 +256,9 @@ describe('startWizard', () => {
     });
 
     it('returns null when user declines confirmation', async () => {
-        mockInput.mockResolvedValueOnce('/tmp');       // workspace
-        mockSelect.mockResolvedValueOnce('latest');    // image tag
-        mockConfirm.mockResolvedValueOnce(false);      // decline
+        mockInput.mockResolvedValueOnce('/tmp'); // workspace
+        mockSelect.mockResolvedValueOnce('latest'); // image tag
+        mockConfirm.mockResolvedValueOnce(false); // decline
 
         const result = await startWizard('/tmp', defaultSettings);
         expect(result).toBeNull();
@@ -319,9 +334,9 @@ describe('runInteractiveMode', () => {
         Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
         const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
         mockSelect
-            .mockResolvedValueOnce('use')            // main menu → select container
-            .mockResolvedValueOnce(CONTAINER_UNSET)  // container picker → none
-            .mockResolvedValueOnce('__exit__');       // main menu → exit
+            .mockResolvedValueOnce('use') // main menu → select container
+            .mockResolvedValueOnce(CONTAINER_UNSET) // container picker → none
+            .mockResolvedValueOnce('__exit__'); // main menu → exit
         await runInteractiveMode(mockProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR });
         expect(mockProgram.parseAsync).not.toHaveBeenCalled();
         expect(exitSpy).toHaveBeenCalledWith(0);
@@ -332,8 +347,8 @@ describe('runInteractiveMode', () => {
         Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
         const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
         mockSelect
-            .mockResolvedValueOnce('use-clear')  // main menu → clear selection
-            .mockResolvedValueOnce('__exit__');   // main menu → exit
+            .mockResolvedValueOnce('use-clear') // main menu → clear selection
+            .mockResolvedValueOnce('__exit__'); // main menu → exit
         await runInteractiveMode(mockProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR, id: 'some-id' });
         // After clearing, buildGlobalFlags should not include --id
         expect(buildGlobalFlags().includes('--id')).toBe(false);

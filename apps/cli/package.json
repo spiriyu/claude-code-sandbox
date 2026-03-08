@@ -28,6 +28,7 @@
         "build:watch": "tsup --watch",
         "dev": "tsx src/cli.ts",
         "lint": "eslint src",
+        "lint:fix": "eslint src --fix",
         "type-check": "tsc --noEmit",
         "test": "vitest run",
         "test:watch": "vitest"

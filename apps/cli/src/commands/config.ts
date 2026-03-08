@@ -47,7 +47,14 @@ export function makeConfigCommand(): Command {
             const g = this.optsWithGlobals();
             const config = loadConfig(String(g.configDir));
             const s = config.settings;
-            const display = { defaultImage: s.defaultImage, defaultTag: s.defaultTag, authMethod: s.authMethod, gitUserName: s.gitUserName, gitUserEmail: s.gitUserEmail, cleanupDays: s.cleanupDays };
+            const display = {
+                defaultImage: s.defaultImage,
+                defaultTag: s.defaultTag,
+                authMethod: s.authMethod,
+                gitUserName: s.gitUserName,
+                gitUserEmail: s.gitUserEmail,
+                cleanupDays: s.cleanupDays,
+            };
 
             if (opts.json) {
                 console.log(JSON.stringify(display, null, 2));

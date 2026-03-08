@@ -108,9 +108,7 @@ export async function startWizard(currentWorkspace: string, settings: ConfigFile
     const { select, input, confirm } = await getPrompts();
 
     // ── Step 1: Workspace ──
-    const rawWorkspace = await withEscBack((s) =>
-        input({ message: 'Workspace path (press Enter to keep current):', default: currentWorkspace }, { signal: s })
-    );
+    const rawWorkspace = await withEscBack((s) => input({ message: 'Workspace path (press Enter to keep current):', default: currentWorkspace }, { signal: s }));
     const workspace = resolve(rawWorkspace);
     if (!existsSync(workspace) || !statSync(workspace).isDirectory()) {
         logger.error(`Directory does not exist: ${workspace}`);
@@ -120,9 +118,7 @@ export async function startWizard(currentWorkspace: string, settings: ConfigFile
     // ── Step 2: Image selection ──
     const image = DEFAULT_IMAGE;
 
-    const imageChoices: { name: string; value: string }[] = [
-        { name: `latest  ${chalk.dim('(default — highest node + python)')}`, value: 'latest' },
-    ];
+    const imageChoices: { name: string; value: string }[] = [{ name: `latest  ${chalk.dim('(default — highest node + python)')}`, value: 'latest' }];
 
     // Show "default from settings" if it differs from latest
     const settingsTag = settings.defaultTag || DEFAULT_IMAGE_TAG;
@@ -135,9 +131,7 @@ export async function startWizard(currentWorkspace: string, settings: ConfigFile
 
     imageChoices.push({ name: `Custom  ${chalk.dim('(pick node + python versions)')}`, value: '__custom__' });
 
-    const imageChoice = await withEscBack((s) =>
-        select<string>({ message: 'Select image tag:', choices: imageChoices }, { signal: s })
-    );
+    const imageChoice = await withEscBack((s) => select<string>({ message: 'Select image tag:', choices: imageChoices }, { signal: s }));
 
     let tag: string;
     if (imageChoice === '__custom__') {
@@ -147,18 +141,14 @@ export async function startWizard(currentWorkspace: string, settings: ConfigFile
             name: `Node ${major}  ${chalk.dim(`(${versions.node[i]})`)}`,
             value: major,
         }));
-        const selectedNode = await withEscBack((s) =>
-            select<string>({ message: 'Select Node.js version:', choices: nodeChoices }, { signal: s })
-        );
+        const selectedNode = await withEscBack((s) => select<string>({ message: 'Select Node.js version:', choices: nodeChoices }, { signal: s }));
 
         // ── Step 2b: Python version ──
         const pythonChoices = versions.python.map((ver) => ({
             name: `Python ${ver}`,
             value: ver,
         }));
-        const selectedPython = await withEscBack((s) =>
-            select<string>({ message: 'Select Python version:', choices: pythonChoices }, { signal: s })
-        );
+        const selectedPython = await withEscBack((s) => select<string>({ message: 'Select Python version:', choices: pythonChoices }, { signal: s }));
 
         tag = `${DOCKER_IMAGE_VERSION}_node${selectedNode}_python${selectedPython}`;
     } else {
@@ -175,9 +165,7 @@ export async function startWizard(currentWorkspace: string, settings: ConfigFile
     console.log(chalk.gray('  Full ref  : ') + chalk.cyan(imageRef));
     logger.blank();
 
-    const confirmed = await withEscBack((s) =>
-        confirm({ message: 'Deploy this container?', default: true }, { signal: s })
-    );
+    const confirmed = await withEscBack((s) => confirm({ message: 'Deploy this container?', default: true }, { signal: s }));
 
     if (!confirmed) {
         logger.info('Cancelled.');
@@ -466,9 +454,7 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
                 );
                 let days: string;
                 if (daysChoice === 'custom') {
-                    days = await withEscBack((s) =>
-                        input({ message: 'Number of days:', default: String(settingsDays) }, { signal: s })
-                    );
+                    days = await withEscBack((s) => input({ message: 'Number of days:', default: String(settingsDays) }, { signal: s }));
                 } else {
                     days = String(settingsDays);
                 }
@@ -481,9 +467,7 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
             // Handle workspace change inline
             if (commandArgs[0] === '__change-workspace__') {
                 const { input } = await getPrompts();
-                const raw = await withEscBack((s) =>
-                    input({ message: 'New workspace path:', default: resolveWorkspace(globalOpts.workspace) }, { signal: s })
-                );
+                const raw = await withEscBack((s) => input({ message: 'New workspace path:', default: resolveWorkspace(globalOpts.workspace) }, { signal: s }));
                 const abs = resolve(raw);
                 if (!existsSync(abs) || !statSync(abs).isDirectory()) {
                     logger.error(`Directory does not exist: ${abs}`);
