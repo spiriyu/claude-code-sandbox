@@ -130,19 +130,19 @@ docker build -f image/Dockerfile \
 docker run -it --rm \
   -e ANTHROPIC_API_KEY=sk-ant-... \
   -v $(pwd):/workspace \
-  claude-code-sandbox
+  spiriyu/claude-code-sandbox:latest
 
 # Run with OAuth token
 docker run -it --rm \
   -e CLAUDE_CODE_OAUTH_TOKEN=sk-ant-oat... \
   -v $(pwd):/workspace \
-  claude-code-sandbox
+  spiriyu/claude-code-sandbox:latest
 
 # Drop into bash instead of Claude
 docker run -it --rm \
   -e ANTHROPIC_API_KEY=sk-ant-... \
   -v $(pwd):/workspace \
-  claude-code-sandbox bash -l
+  spiriyu/claude-code-sandbox:latest bash -l
 
 # Run tests
 bash test/entrypoint.test.sh
@@ -155,7 +155,7 @@ Create a `.env` file with your credentials, then use this `docker-compose.yml`:
 
 ```yaml
 services:
-    claude:
+    claude-code-sandbox:
         image: spiriyu/claude-code-sandbox:latest
         stdin_open: true # docker run -i
         tty: true # docker run -t
@@ -172,20 +172,20 @@ ANTHROPIC_API_KEY=sk-ant-api03-...
 
 ```bash
 # Start Claude Code interactively
-docker compose run --rm claude
+docker compose run --rm claude-code-sandbox
 
 # Drop into bash instead
-docker compose run --rm claude bash -l
+docker compose run --rm claude-code-sandbox bash -l
 
 # Run a one-off command
-docker compose run --rm claude bash -lc "claude -p 'explain this project'"
+docker compose run --rm claude-code-sandbox bash -lc "claude -p 'explain this project'"
 ```
 
 To match your host user's UID/GID (avoids file permission issues on mounted volumes), build locally:
 
 ```yaml
 services:
-    claude:
+    claude-code-sandbox:
         build:
             context: .
             dockerfile: image/Dockerfile
@@ -201,5 +201,5 @@ services:
 
 ```bash
 # Build with your UID/GID and start
-UID=$(id -u) GID=$(id -g) docker compose run --rm claude
+UID=$(id -u) GID=$(id -g) docker compose run --rm claude-code-sandbox
 ```
