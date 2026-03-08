@@ -1,4 +1,6 @@
 import chalk from 'chalk';
+import { existsSync, statSync } from 'fs';
+import { resolve } from 'path';
 import { type Command } from 'commander';
 import { logger } from '../utils/logger.js';
 import { DEFAULT_CONFIG_DIR } from './constants.js';
@@ -105,6 +107,7 @@ export async function promptMainMenu(program: Command): Promise<string[] | null>
                     choices: [
                         new Separator('── Container Management ──'),
                         { name: 'Select active container', value: 'use' },
+                        { name: 'Change workspace', value: 'change-workspace' },
                         { name: `Start ${globalOpts.id ? 'selected' : 'new'} container`, value: 'start' },
                         { name: 'List containers', value: 'ls' },
                         { name: 'List all history (including removed)', value: 'history' },
@@ -190,6 +193,8 @@ export async function promptMainMenu(program: Command): Promise<string[] | null>
             return ['use'];
         case 'use-clear':
             return ['use', '--clear'];
+        case 'change-workspace':
+            return ['__change-workspace__'];
         case 'auth-setup':
             return ['auth', 'setup'];
         case 'auth-status':
@@ -303,6 +308,23 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
                 globalOpts.id = undefined;
                 logger.success('Container selection cleared.');
                 await pressAnyKey();
+                continue;
+            }
+
+            // Handle workspace change inline
+            if (commandArgs[0] === '__change-workspace__') {
+                const { input } = await getPrompts();
+                const raw = await withEscBack((s) =>
+                    input({ message: 'New workspace path:', default: resolveWorkspace(globalOpts.workspace) }, { signal: s })
+                );
+                const abs = resolve(raw);
+                if (!existsSync(abs) || !statSync(abs).isDirectory()) {
+                    logger.error(`Directory does not exist: ${abs}`);
+                    await pressAnyKey();
+                } else {
+                    globalOpts.workspace = abs;
+                    logger.success(`Workspace updated: ${abs}`);
+                }
                 continue;
             }
 

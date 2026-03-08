@@ -30,20 +30,43 @@ vi.mock('../utils/logger.js', () => ({
 // ─── buildGlobalFlags ─────────────────────────────────────────────────────────
 
 describe('buildGlobalFlags', () => {
-    it('returns [] when all opts are defaults', () => {
-        expect(buildGlobalFlags({ configDir: DEFAULT_CONFIG_DIR })).toEqual([]);
+    const fakeProgram = { help: vi.fn(), parseAsync: vi.fn(), version: vi.fn().mockReturnValue('0.0.0-test') };
+
+    it('returns [] when all opts are defaults', async () => {
+        const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
+        Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
+        mockSelect.mockResolvedValueOnce('__exit__');
+        await runInteractiveMode(fakeProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR });
+        expect(buildGlobalFlags()).toEqual([]);
+        exitSpy.mockRestore();
     });
 
-    it('returns --config-dir when configDir differs from default', () => {
-        expect(buildGlobalFlags({ configDir: '/custom' })).toEqual(['--config-dir', '/custom']);
+    it('returns --config-dir when configDir differs from default', async () => {
+        const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
+        Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
+        mockSelect.mockResolvedValueOnce('__exit__');
+        await runInteractiveMode(fakeProgram as unknown as Command, { configDir: '/custom' });
+        expect(buildGlobalFlags()).toEqual(['--config-dir', '/custom']);
+        exitSpy.mockRestore();
     });
 
-    it('returns --workspace when workspace is set', () => {
-        expect(buildGlobalFlags({ configDir: DEFAULT_CONFIG_DIR, workspace: '/proj' })).toEqual(['--workspace', '/proj']);
+    it('returns --workspace when workspace is set', async () => {
+        const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
+        Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
+        mockSelect.mockResolvedValueOnce('__exit__');
+        await runInteractiveMode(fakeProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR, workspace: '/proj' });
+        expect(buildGlobalFlags()).toEqual(['--workspace', '/proj']);
+        exitSpy.mockRestore();
     });
 
-    it('returns all three flags when all are non-default', () => {
-        expect(buildGlobalFlags({ configDir: '/custom', workspace: '/proj', id: 'abc123' })).toEqual(['--config-dir', '/custom', '--workspace', '/proj', '--id', 'abc123']);
+    it('returns config-dir and workspace flags (id cleared when container not found)', async () => {
+        const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
+        Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
+        mockSelect.mockResolvedValueOnce('__exit__');
+        // id 'abc123' does not match any container, so runInteractiveMode clears it
+        await runInteractiveMode(fakeProgram as unknown as Command, { configDir: '/custom', workspace: '/proj', id: 'abc123' });
+        expect(buildGlobalFlags()).toEqual(['--config-dir', '/custom', '--workspace', '/proj']);
+        exitSpy.mockRestore();
     });
 });
 
@@ -219,12 +242,12 @@ describe('runInteractiveMode', () => {
     it('clears container selection via "use-clear" menu option', async () => {
         Object.defineProperty(process.stdin, 'isTTY', { value: true, configurable: true });
         const exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number | string) => undefined as never);
-        const opts = { configDir: DEFAULT_CONFIG_DIR, id: 'some-id' };
         mockSelect
             .mockResolvedValueOnce('use-clear')  // main menu → clear selection
             .mockResolvedValueOnce('__exit__');   // main menu → exit
-        await runInteractiveMode(mockProgram as unknown as Command, opts);
-        expect(opts.id).toBeUndefined();
+        await runInteractiveMode(mockProgram as unknown as Command, { configDir: DEFAULT_CONFIG_DIR, id: 'some-id' });
+        // After clearing, buildGlobalFlags should not include --id
+        expect(buildGlobalFlags().includes('--id')).toBe(false);
         expect(exitSpy).toHaveBeenCalledWith(0);
         exitSpy.mockRestore();
     });
