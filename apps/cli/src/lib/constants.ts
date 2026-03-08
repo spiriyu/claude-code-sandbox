@@ -1,6 +1,8 @@
 import { DEFAULT_NODE_VERSION, DEFAULT_PYTHON_VERSION } from '@claude-code-sandbox/shared';
 import { homedir } from 'os';
 import { join } from 'path';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
 
 export { DEFAULT_NODE_VERSION, DEFAULT_PYTHON_VERSION };
 
@@ -16,6 +18,26 @@ export const ENV_VARS = {
 export const DEFAULT_CONFIG_DIR = join(homedir(), '.claude-code-sandbox');
 export const DEFAULT_IMAGE = 'spiriyu/claude-code-sandbox';
 export const DEFAULT_IMAGE_TAG = 'latest';
+
+/**
+ * Docker image version injected at build time via tsup define.
+ * In dev mode (tsx), falls back to reading apps/docker/package.json directly.
+ */
+function resolveDockerImageVersion(): string {
+    if (process.env.DOCKER_IMAGE_VERSION) return process.env.DOCKER_IMAGE_VERSION;
+    try {
+        // Dev mode: resolve relative to this source file → apps/cli/src/lib/
+        // Traverse up to monorepo root: ../../../../apps/docker/package.json
+        const thisDir = fileURLToPath(new URL('.', import.meta.url));
+        const pkgPath = join(thisDir, '..', '..', '..', '..', 'apps', 'docker', 'package.json');
+        const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+        return pkg.version;
+    } catch {
+        return 'latest';
+    }
+}
+
+export const DOCKER_IMAGE_VERSION: string = resolveDockerImageVersion();
 
 // Docker container naming
 export const CONTAINER_NAME_PREFIX = 'claude-code-sandbox-';

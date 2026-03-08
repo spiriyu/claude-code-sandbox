@@ -3,12 +3,13 @@ import { existsSync, statSync } from 'fs';
 import { resolve } from 'path';
 import { type Command } from 'commander';
 import { logger } from '../utils/logger.js';
-import { DEFAULT_CONFIG_DIR } from './constants.js';
+import { DEFAULT_CONFIG_DIR, DEFAULT_IMAGE, DEFAULT_IMAGE_TAG, DOCKER_IMAGE_VERSION } from './constants.js';
 import { withEscBack } from './prompt-utils.js';
 import { loadConfig, type ConfigFile } from './config-store.js';
 import { findContainerById, getAllContainers } from './container-store.js';
 import { resolveWorkspace } from './workspace.js';
 import { formatContainerLine } from './selection.js';
+import { versions } from '@claude-code-sandbox/shared';
 
 // Lazy-load @inquirer/prompts to avoid bundling CJS deps into the ESM top-level scope.
 // (Same pattern as selection.ts — resolves the "Dynamic require of tty" esbuild issue.)
@@ -92,6 +93,99 @@ export async function promptConfigReset(): Promise<string[]> {
     return ['config', 'reset', key];
 }
 
+export interface StartWizardResult {
+    workspace: string;
+    image: string;
+    tag: string;
+}
+
+/**
+ * Multi-step wizard for deploying a new container.
+ * Returns the workspace, image, and tag if confirmed, or null if cancelled.
+ */
+export async function startWizard(currentWorkspace: string, settings: ConfigFile['settings']): Promise<StartWizardResult | null> {
+    const { select, input, confirm } = await getPrompts();
+
+    // ── Step 1: Workspace ──
+    const rawWorkspace = await withEscBack((s) =>
+        input({ message: 'Workspace path (press Enter to keep current):', default: currentWorkspace }, { signal: s })
+    );
+    const workspace = resolve(rawWorkspace);
+    if (!existsSync(workspace) || !statSync(workspace).isDirectory()) {
+        logger.error(`Directory does not exist: ${workspace}`);
+        return null;
+    }
+
+    // ── Step 2: Image selection ──
+    const image = DEFAULT_IMAGE;
+
+    const imageChoices: { name: string; value: string }[] = [
+        { name: `latest  ${chalk.dim('(default — highest node + python)')}`, value: 'latest' },
+    ];
+
+    // Show "default from settings" if it differs from latest
+    const settingsTag = settings.defaultTag || DEFAULT_IMAGE_TAG;
+    if (settingsTag !== 'latest') {
+        imageChoices.push({
+            name: `${settingsTag}  ${chalk.dim('(from settings)')}`,
+            value: settingsTag,
+        });
+    }
+
+    imageChoices.push({ name: `Custom  ${chalk.dim('(pick node + python versions)')}`, value: '__custom__' });
+
+    const imageChoice = await withEscBack((s) =>
+        select<string>({ message: 'Select image tag:', choices: imageChoices }, { signal: s })
+    );
+
+    let tag: string;
+    if (imageChoice === '__custom__') {
+        // ── Step 2a: Node version ──
+        const nodeMajors = versions.node.map((v) => v.split('.')[0]);
+        const nodeChoices = nodeMajors.map((major, i) => ({
+            name: `Node ${major}  ${chalk.dim(`(${versions.node[i]})`)}`,
+            value: major,
+        }));
+        const selectedNode = await withEscBack((s) =>
+            select<string>({ message: 'Select Node.js version:', choices: nodeChoices }, { signal: s })
+        );
+
+        // ── Step 2b: Python version ──
+        const pythonChoices = versions.python.map((ver) => ({
+            name: `Python ${ver}`,
+            value: ver,
+        }));
+        const selectedPython = await withEscBack((s) =>
+            select<string>({ message: 'Select Python version:', choices: pythonChoices }, { signal: s })
+        );
+
+        tag = `${DOCKER_IMAGE_VERSION}_node${selectedNode}_python${selectedPython}`;
+    } else {
+        tag = imageChoice;
+    }
+
+    // ── Step 3: Confirmation ──
+    const imageRef = `${image}:${tag}`;
+    logger.blank();
+    console.log(chalk.bold('  Container Summary'));
+    console.log(chalk.gray('  Workspace : ') + chalk.cyan(workspace));
+    console.log(chalk.gray('  Image     : ') + chalk.cyan(image));
+    console.log(chalk.gray('  Tag       : ') + chalk.cyan(tag));
+    console.log(chalk.gray('  Full ref  : ') + chalk.cyan(imageRef));
+    logger.blank();
+
+    const confirmed = await withEscBack((s) =>
+        confirm({ message: 'Deploy this container?', default: true }, { signal: s })
+    );
+
+    if (!confirmed) {
+        logger.info('Cancelled.');
+        return null;
+    }
+
+    return { workspace, image, tag };
+}
+
 /**
  * Show the main interactive menu. Returns the argv fragment to run, or null if
  * exit/help was handled internally (process.exit / program.help called).
@@ -107,8 +201,7 @@ export async function promptMainMenu(program: Command): Promise<string[] | null>
                     choices: [
                         new Separator('── Container Management ──'),
                         { name: 'Select active container', value: 'use' },
-                        { name: 'Change workspace', value: 'change-workspace' },
-                        { name: `Start ${globalOpts.id ? 'selected' : 'new'} container`, value: 'start' },
+                        { name: 'Deploy new container (wizard)', value: 'start-wizard' },
                         { name: 'List containers', value: 'ls' },
                         { name: 'List all history (including removed)', value: 'history' },
                         new Separator('── Container Bulk Lifecycle ──'),
@@ -171,6 +264,8 @@ export async function promptMainMenu(program: Command): Promise<string[] | null>
         case '__help__':
             program.help();
             return null; // program.help() calls process.exit; needed when mocked
+        case 'start-wizard':
+            return ['__start-wizard__'];
         case 'start':
             return ['start'];
         case 'stop':
@@ -308,6 +403,18 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
                 globalOpts.id = undefined;
                 logger.success('Container selection cleared.');
                 await pressAnyKey();
+                continue;
+            }
+
+            // Handle start wizard inline
+            if (commandArgs[0] === '__start-wizard__') {
+                const result = await startWizard(workspace, config.settings);
+                if (result) {
+                    globalOpts.workspace = result.workspace;
+                    const fullArgv = [...buildGlobalFlags(), 'start', '--image', result.image, '--tag', result.tag];
+                    await parseAsyncInteractive(program, fullArgv);
+                    await pressAnyKey();
+                }
                 continue;
             }
 

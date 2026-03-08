@@ -1,19 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { type Command } from 'commander';
-import { buildGlobalFlags, promptConfigGet, promptConfigSet, promptConfigReset, promptMainMenu, promptContainerSelect, CONTAINER_UNSET, runInteractiveMode } from './interactive.js';
+import { buildGlobalFlags, promptConfigGet, promptConfigSet, promptConfigReset, promptMainMenu, promptContainerSelect, CONTAINER_UNSET, runInteractiveMode, startWizard, type StartWizardResult } from './interactive.js';
 import { DEFAULT_CONFIG_DIR } from './constants.js';
 import { type ConfigFile } from './config-store.js';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
-const { mockSelect, mockInput } = vi.hoisted(() => ({
+const { mockSelect, mockInput, mockConfirm } = vi.hoisted(() => ({
     mockSelect: vi.fn<[], Promise<string>>(),
     mockInput: vi.fn<[], Promise<string>>(),
+    mockConfirm: vi.fn<[], Promise<boolean>>(),
 }));
 
 vi.mock('@inquirer/prompts', () => ({
     select: mockSelect,
     input: mockInput,
+    confirm: mockConfirm,
     Separator: class {
         readonly separator: string;
         readonly type = 'separator';
@@ -134,6 +136,11 @@ describe('promptMainMenu', () => {
         expect(await promptMainMenu(mockProgram as unknown as Command)).toEqual(['start']);
     });
 
+    it("returns ['__start-wizard__'] for 'start-wizard'", async () => {
+        mockSelect.mockResolvedValueOnce('start-wizard');
+        expect(await promptMainMenu(mockProgram as unknown as Command)).toEqual(['__start-wizard__']);
+    });
+
     it("returns ['auth', 'setup'] for 'auth-setup'", async () => {
         mockSelect.mockResolvedValueOnce('auth-setup');
         expect(await promptMainMenu(mockProgram as unknown as Command)).toEqual(['auth', 'setup']);
@@ -179,6 +186,82 @@ describe('promptContainerSelect', () => {
     it('returns the chosen container id when a container is selected', async () => {
         mockSelect.mockResolvedValueOnce('abc-123');
         expect(await promptContainerSelect(emptyConfig, null)).toBe('abc-123');
+    });
+});
+
+// ─── startWizard ─────────────────────────────────────────────────────────────
+
+describe('startWizard', () => {
+    const defaultSettings: ConfigFile['settings'] = {
+        defaultImage: '',
+        defaultTag: '',
+        authMethod: null,
+        currentContainerId: null,
+        gitUserName: null,
+        gitUserEmail: null,
+    };
+
+    beforeEach(() => {
+        mockSelect.mockReset();
+        mockInput.mockReset();
+        mockConfirm.mockReset();
+    });
+
+    it('returns workspace, image, and tag for latest selection', async () => {
+        mockInput.mockResolvedValueOnce('/tmp');       // workspace
+        mockSelect.mockResolvedValueOnce('latest');    // image tag
+        mockConfirm.mockResolvedValueOnce(true);       // confirm
+
+        const result = await startWizard('/tmp', defaultSettings);
+        expect(result).toEqual({
+            workspace: '/tmp',
+            image: 'spiriyu/claude-code-sandbox',
+            tag: 'latest',
+        });
+    });
+
+    it('returns custom tag with node and python selections', async () => {
+        mockInput.mockResolvedValueOnce('/tmp');         // workspace
+        mockSelect.mockResolvedValueOnce('__custom__');  // custom image
+        mockSelect.mockResolvedValueOnce('22');          // node 22
+        mockSelect.mockResolvedValueOnce('3.12');        // python 3.12
+        mockConfirm.mockResolvedValueOnce(true);         // confirm
+
+        const result = await startWizard('/tmp', defaultSettings);
+        expect(result).not.toBeNull();
+        expect(result!.workspace).toBe('/tmp');
+        expect(result!.image).toBe('spiriyu/claude-code-sandbox');
+        expect(result!.tag).toMatch(/^.+_node22_python3\.12$/);
+    });
+
+    it('returns null when user declines confirmation', async () => {
+        mockInput.mockResolvedValueOnce('/tmp');       // workspace
+        mockSelect.mockResolvedValueOnce('latest');    // image tag
+        mockConfirm.mockResolvedValueOnce(false);      // decline
+
+        const result = await startWizard('/tmp', defaultSettings);
+        expect(result).toBeNull();
+    });
+
+    it('returns null when workspace does not exist', async () => {
+        mockInput.mockResolvedValueOnce('/nonexistent/path/abc123');
+
+        const result = await startWizard('/tmp', defaultSettings);
+        expect(result).toBeNull();
+    });
+
+    it('shows settings tag when it differs from latest', async () => {
+        const settingsWithTag = { ...defaultSettings, defaultTag: 'latest_node22_python3.11' };
+        mockInput.mockResolvedValueOnce('/tmp');
+        mockSelect.mockResolvedValueOnce('latest_node22_python3.11'); // pick settings tag
+        mockConfirm.mockResolvedValueOnce(true);
+
+        const result = await startWizard('/tmp', settingsWithTag);
+        expect(result).toEqual({
+            workspace: '/tmp',
+            image: 'spiriyu/claude-code-sandbox',
+            tag: 'latest_node22_python3.11',
+        });
     });
 });
 
