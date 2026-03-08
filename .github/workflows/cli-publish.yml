@@ -17,6 +17,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
+
       - name: Extract version from tag
         id: version
         run: echo "version=${GITHUB_REF_NAME#cli-v}" >> "$GITHUB_OUTPUT"
@@ -39,7 +42,7 @@ jobs:
           npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
       - name: Publish to npm
-        run: npm publish --access public --provenance
+        run: npm publish --access public
         working-directory: apps/cli
 
       - name: Create GitHub Release
