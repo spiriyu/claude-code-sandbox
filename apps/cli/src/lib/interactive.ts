@@ -3,6 +3,9 @@ import { type Command } from 'commander';
 import { logger } from '../utils/logger.js';
 import { DEFAULT_CONFIG_DIR } from './constants.js';
 import { withEscBack } from './prompt-utils.js';
+import { loadConfig } from './config-store.js';
+import { findContainerById } from './container-store.js';
+import { resolveWorkspace } from './workspace.js';
 
 // Lazy-load @inquirer/prompts to avoid bundling CJS deps into the ESM top-level scope.
 // (Same pattern as selection.ts — resolves the "Dynamic require of tty" esbuild issue.)
@@ -203,6 +206,16 @@ export async function runInteractiveMode(program: Command, globalOpts: GlobalOpt
     while (true) {
         logger.blank();
         console.log(chalk.bold('  Claude Code Sandbox — Interactive Mode'));
+
+        const config = loadConfig(globalOpts.configDir);
+        const selectedId = globalOpts.id ?? config.settings.currentContainerId ?? null;
+        const selectedContainer = selectedId ? findContainerById(config, selectedId) : null;
+        const shortId = selectedContainer ? selectedContainer.id.replace(/-/g, '').slice(0, 8) : null;
+        const workspace = selectedContainer ? selectedContainer.workspace : resolveWorkspace(globalOpts.workspace);
+
+        console.log(chalk.gray('  Container : ') + (shortId ? chalk.cyan(shortId) : chalk.dim('none')));
+        console.log(chalk.gray('  Workspace : ') + chalk.cyan(workspace));
+
         logger.line();
 
         try {
