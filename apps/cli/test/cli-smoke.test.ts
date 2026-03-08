@@ -53,7 +53,7 @@ describe('CLI binary smoke tests', () => {
             const result = run(['--help']);
             // 'status' was removed; 'ls' replaced it
             // We check that 'status' is not a top-level command (it may appear in descriptions)
-            const lines = result.stdout.split('\n').filter(l => /^\s+(status)\s/.test(l));
+            const lines = result.stdout.split('\n').filter((l) => /^\s+(status)\s/.test(l));
             expect(lines).toHaveLength(0);
         });
 
@@ -64,12 +64,7 @@ describe('CLI binary smoke tests', () => {
     });
 
     describe('subcommand help', () => {
-        const subcommands = [
-            'start', 'stop', 'remove', 'attach', 'shell',
-            'ls', 'history', 'use',
-            'start-all', 'stop-all',
-            'auth', 'config',
-        ];
+        const subcommands = ['start', 'stop', 'remove', 'attach', 'shell', 'ls', 'history', 'use', 'start-all', 'stop-all', 'auth', 'config'];
 
         for (const cmd of subcommands) {
             it(`${cmd} --help exits 0 and shows Usage:`, () => {

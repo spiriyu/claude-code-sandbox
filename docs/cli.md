@@ -107,7 +107,7 @@ Config keys:
 | --------------- | ----------------------------- | -------------------------------------- |
 | `imageName`     | `spiriyu/claude-code-sandbox` | Docker Hub image                       |
 | `imageTag`      | `latest`                      | Image tag                              |
-| `containerName` | `claude-code-sandbox`              | Container name for `docker run --name` |
+| `containerName` | `claude-code-sandbox`         | Container name for `docker run --name` |
 | `workspacePath` | `process.cwd()` at startup    | Default workspace mount                |
 | `authMethod`    | `null`                        | Set by `auth` wizard for reference     |
 | `defaultModel`  | `null`                        | Reserved for future use                |

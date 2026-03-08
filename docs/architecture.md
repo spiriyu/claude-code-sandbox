@@ -23,8 +23,8 @@ claude-code-sandbox/
 
 ## Package Map
 
-| Package       | Name                     | Type            | Tooling                  |
-| ------------- | ------------------------ | --------------- | ------------------------ |
+| Package       | Name                                  | Type            | Tooling                  |
+| ------------- | ------------------------------------- | --------------- | ------------------------ |
 | `apps/cli`    | `@claude-code-sandbox/cli`            | npm CLI         | TypeScript, tsup, vitest |
 | `apps/docker` | `@spiriyu/claude-code-sandbox-docker` | Docker image    | Bash, Dockerfile         |
 | `libs/shared` | `@spiriyu/claude-code-sandbox-shared` | Private library | TypeScript               |
@@ -71,11 +71,11 @@ This lets `apps/cli` import `@spiriyu/claude-code-sandbox-shared` as if it were 
 
 The CLI imports from `@spiriyu/claude-code-sandbox-shared` via three aligned configurations:
 
-| Tool                     | Config                                             | Alias                                                       |
-| ------------------------ | -------------------------------------------------- | ----------------------------------------------------------- |
-| Type-checker (`tsc`)     | `apps/cli/tsconfig.json` → `paths`                 | `@spiriyu/claude-code-sandbox-shared` → `../../libs/shared/src/index.ts`  |
-| Bundler (`tsup`/esbuild) | `apps/cli/tsup.config.ts` → `esbuildOptions.alias` | same path                                                   |
-| Test runner (`vitest`)   | `apps/cli/vitest.config.ts` → `resolve.alias`      | same path                                                   |
+| Tool                     | Config                                             | Alias                                                                    |
+| ------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------ |
+| Type-checker (`tsc`)     | `apps/cli/tsconfig.json` → `paths`                 | `@spiriyu/claude-code-sandbox-shared` → `../../libs/shared/src/index.ts` |
+| Bundler (`tsup`/esbuild) | `apps/cli/tsup.config.ts` → `esbuildOptions.alias` | same path                                                                |
+| Test runner (`vitest`)   | `apps/cli/vitest.config.ts` → `resolve.alias`      | same path                                                                |
 
 `rootDir` is intentionally absent from `apps/cli/tsconfig.json` — having it would prevent `tsc --noEmit` from resolving cross-package paths. tsup manages the output directory (`dist/`) independently via its own `outDir` option.
 

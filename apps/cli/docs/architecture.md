@@ -25,6 +25,7 @@ All Docker interactions use the `dockerode` npm package (connects to Docker daem
 directly), replacing the previous `spawnSync('docker', ...)` approach.
 
 Benefits:
+
 - No dependency on the Docker CLI being in `$PATH`
 - Richer programmatic API with proper error objects
 - Native stream multiplexing for the `attach` command
@@ -36,6 +37,7 @@ The `conf` library is replaced with a hand-rolled JSON file manager at
 `~/.claude-code-sandbox/config.json` (path configurable via `CLAUDE_SANDBOX_CONFIG_DIR`).
 
 Why custom:
+
 - Full control over the multi-container schema
 - Atomic writes (write temp → rename) to avoid corruption
 - Built-in schema versioning for future migrations
@@ -61,12 +63,14 @@ Precedence: `CLI flag > env var > config file setting > built-in default`.
 
 The CLI validates at startup that `process.platform !== 'win32'`. If running on Windows, it
 exits immediately with a clear error message. This is enforced because:
+
 - Dockerode connects via Unix socket (`/var/run/docker.sock`)
 - File paths use POSIX conventions throughout
 
 ### 8. Per-Container `.claude` Directory
 
 Each container mounts a host directory into `/root/.claude` inside the container:
+
 - Host: `~/.claude-code-sandbox/containers/<short-id>/.claude`
 - Container: `/home/dev/.claude`
 
@@ -139,11 +143,11 @@ User runs: claude-code-sandbox <command> [flags]
 
 ## Container Identity & Naming
 
-| Field         | Value                                            |
-|---------------|--------------------------------------------------|
-| `id`          | UUID v4, e.g. `a1b2c3d4-e5f6-7890-abcd-ef12...` |
-| `name`        | `claude-code-sandbox-<first-8-chars-of-uuid>`         |
-| Short ID      | First 8 chars of UUID (used in `--id`, `ls`)     |
+| Field    | Value                                           |
+| -------- | ----------------------------------------------- |
+| `id`     | UUID v4, e.g. `a1b2c3d4-e5f6-7890-abcd-ef12...` |
+| `name`   | `claude-code-sandbox-<first-8-chars-of-uuid>`   |
+| Short ID | First 8 chars of UUID (used in `--id`, `ls`)    |
 
 The Docker container name is derived deterministically from the UUID, so it's stable across
 restarts and visible in `docker ps` output.
@@ -152,17 +156,18 @@ restarts and visible in `docker ps` output.
 
 ## Dependencies
 
-| Package              | Purpose                                      |
-|----------------------|----------------------------------------------|
-| `dockerode`          | Docker daemon API client                     |
-| `@types/dockerode`   | TypeScript types for dockerode               |
-| `commander`          | CLI argument parsing                         |
-| `inquirer`           | Interactive selection prompts                |
-| `chalk`              | Colored terminal output                      |
-| `ora`                | Spinner for async operations                 |
-| `uuid`               | UUID v4 generation (`crypto.randomUUID()`)   |
+| Package            | Purpose                                    |
+| ------------------ | ------------------------------------------ |
+| `dockerode`        | Docker daemon API client                   |
+| `@types/dockerode` | TypeScript types for dockerode             |
+| `commander`        | CLI argument parsing                       |
+| `inquirer`         | Interactive selection prompts              |
+| `chalk`            | Colored terminal output                    |
+| `ora`              | Spinner for async operations               |
+| `uuid`             | UUID v4 generation (`crypto.randomUUID()`) |
 
 Removed:
+
 - `conf` — replaced by custom JSON store
 
 ---

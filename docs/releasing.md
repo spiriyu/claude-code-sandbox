@@ -27,11 +27,11 @@ cli-publish.yml:
 
 ## Tag Strategy
 
-| Tag pattern                       | Triggers              | Publishes to | GitHub Release |
-|-----------------------------------|-----------------------|--------------|----------------|
-| `docker-v1.2.0`                   | `docker-publish.yml`  | Docker Hub   | Yes            |
+| Tag pattern                         | Triggers             | Publishes to | GitHub Release      |
+| ----------------------------------- | -------------------- | ------------ | ------------------- |
+| `docker-v1.2.0`                     | `docker-publish.yml` | Docker Hub   | Yes                 |
 | `docker-v1.2.0-rebuild202603071430` | `docker-publish.yml` | Docker Hub   | No (already exists) |
-| `cli-v1.2.0`                      | `cli-publish.yml`     | npmjs.com    | Yes            |
+| `cli-v1.2.0`                        | `cli-publish.yml`    | npmjs.com    | Yes                 |
 
 ## Running a Release
 
@@ -68,6 +68,7 @@ When you add or remove a Node/Python version from `libs/shared/src/versions.json
 2. Run `npm run release` and choose **"Update versions (rebuild Docker + patch CLI)"**
 
 What happens:
+
 - **Docker**: no version bump — a dated rebuild tag (`docker-v1.0.0-rebuild202603071430`) is pushed. The workflow rebuilds all image combinations under the current Docker version. Alias tags (`latest`, `node22`, etc.) are overwritten to point to the new runtime versions. No new GitHub Release is created (one already exists for `1.0.0`).
 - **CLI**: automatically gets a patch version bump (e.g. `0.1.0` → `0.1.1`) and is published to npm, because the shared lib it bundles now includes the updated `versions.json`.
 
@@ -78,7 +79,7 @@ The rebuild tag timestamp format is `YYYYMMDDHHmm`, allowing multiple rebuilds i
 Each app tracks its own version independently:
 
 | App    | Version file               |
-|--------|----------------------------|
+| ------ | -------------------------- |
 | Docker | `apps/docker/package.json` |
 | CLI    | `apps/cli/package.json`    |
 
@@ -94,16 +95,16 @@ No setup needed for `GITHUB_TOKEN` — GitHub provides it automatically in every
 
 Set in: GitHub repo → Settings → Secrets and variables → Actions → New repository secret.
 
-| Secret               | Value                                                                                          |
-|----------------------|-----------------------------------------------------------------------------------------------|
-| `DOCKERHUB_USERNAME` | Your Docker Hub username (`spiriyu`)                                                           |
-| `DOCKERHUB_TOKEN`    | Docker Hub → Account Settings → Personal access tokens → Generate new token (Read & Write)   |
+| Secret               | Value                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| `DOCKERHUB_USERNAME` | Your Docker Hub username (`spiriyu`)                                                       |
+| `DOCKERHUB_TOKEN`    | Docker Hub → Account Settings → Personal access tokens → Generate new token (Read & Write) |
 
 ### npm secret
 
-| Secret      | Value                                                                              |
-|-------------|------------------------------------------------------------------------------------|
-| `NPM_TOKEN` | npmjs.com → avatar → Access Tokens → Generate New Token → **Automation** type     |
+| Secret      | Value                                                                         |
+| ----------- | ----------------------------------------------------------------------------- |
+| `NPM_TOKEN` | npmjs.com → avatar → Access Tokens → Generate New Token → **Automation** type |
 
 ### Local git setup
 

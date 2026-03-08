@@ -36,5 +36,3 @@ This is the npm CLI package `@claude-code-sandbox/cli`. It manages the `claude-c
 - tsconfig.json `paths` (for type-checking)
 - tsup.config.ts `esbuildOptions.alias` (for bundling)
 - vitest.config.ts `resolve.alias` (for tests)
-
-

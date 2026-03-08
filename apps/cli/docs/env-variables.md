@@ -10,13 +10,13 @@ CLI flag > environment variable > config file setting > built-in default
 
 ## Container Management
 
-| Variable                   | Default                         | Description                                         |
-|----------------------------|---------------------------------|-----------------------------------------------------|
-| `CLAUDE_SANDBOX_CONFIG_DIR`| `~/.claude-code-sandbox`        | Directory containing `config.json` and `.env`       |
-| `CLAUDE_SANDBOX_WORKSPACE` | `process.cwd()`                 | Workspace directory to mount (default workspace)    |
-| `CLAUDE_SANDBOX_IMAGE`     | `spiriyu/claude-code-sandbox`   | Docker image name                                   |
-| `CLAUDE_SANDBOX_TAG`       | `latest`                        | Docker image tag                                    |
-| `CLAUDE_SANDBOX_DETACH`    | `false`                         | Run in detached mode by default (`"true"`/`"false"`)|
+| Variable                    | Default                       | Description                                          |
+| --------------------------- | ----------------------------- | ---------------------------------------------------- |
+| `CLAUDE_SANDBOX_CONFIG_DIR` | `~/.claude-code-sandbox`      | Directory containing `config.json` and `.env`        |
+| `CLAUDE_SANDBOX_WORKSPACE`  | `process.cwd()`               | Workspace directory to mount (default workspace)     |
+| `CLAUDE_SANDBOX_IMAGE`      | `spiriyu/claude-code-sandbox` | Docker image name                                    |
+| `CLAUDE_SANDBOX_TAG`        | `latest`                      | Docker image tag                                     |
+| `CLAUDE_SANDBOX_DETACH`     | `false`                       | Run in detached mode by default (`"true"`/`"false"`) |
 
 ---
 
@@ -24,22 +24,23 @@ CLI flag > environment variable > config file setting > built-in default
 
 Dockerode picks these up automatically from the environment.
 
-| Variable          | Default                   | Description                              |
-|-------------------|---------------------------|------------------------------------------|
-| `DOCKER_HOST`     | `/var/run/docker.sock`    | Docker daemon socket or TCP address      |
-| `DOCKER_TLS_VERIFY` | —                       | Set to `1` to enable TLS verification    |
-| `DOCKER_CERT_PATH`| —                         | Path to TLS certificates directory       |
+| Variable            | Default                | Description                           |
+| ------------------- | ---------------------- | ------------------------------------- |
+| `DOCKER_HOST`       | `/var/run/docker.sock` | Docker daemon socket or TCP address   |
+| `DOCKER_TLS_VERIFY` | —                      | Set to `1` to enable TLS verification |
+| `DOCKER_CERT_PATH`  | —                      | Path to TLS certificates directory    |
 
 ---
 
 ## Authentication
 
-| Variable                  | Default | Description                                          |
-|---------------------------|---------|------------------------------------------------------|
-| `ANTHROPIC_API_KEY`       | —       | Anthropic API key (prefix: `sk-ant-api03-`)          |
-| `CLAUDE_CODE_OAUTH_TOKEN` | —       | Claude Code OAuth token (prefix: `sk-ant-oat01-`)    |
+| Variable                  | Default | Description                                       |
+| ------------------------- | ------- | ------------------------------------------------- |
+| `ANTHROPIC_API_KEY`       | —       | Anthropic API key (prefix: `sk-ant-api03-`)       |
+| `CLAUDE_CODE_OAUTH_TOKEN` | —       | Claude Code OAuth token (prefix: `sk-ant-oat01-`) |
 
 Auth resolution order:
+
 1. `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN` in environment
 2. `~/.claude-code-sandbox/.env` file (parsed and injected)
 3. Neither found → error, prompt to run `claude-code-sandbox auth setup`
@@ -48,15 +49,15 @@ Auth resolution order:
 
 ## Validation Rules
 
-| Variable                   | Validation Rule                                                          |
-|----------------------------|--------------------------------------------------------------------------|
-| `CLAUDE_SANDBOX_CONFIG_DIR`| Valid filesystem path; parent directory must exist; will be created      |
-| `CLAUDE_SANDBOX_WORKSPACE` | Must be an existing directory (resolved to absolute path)                |
-| `CLAUDE_SANDBOX_IMAGE`     | `[a-z0-9._\-/]+` (Docker image name format), max 256 chars              |
-| `CLAUDE_SANDBOX_TAG`       | `[a-zA-Z0-9._\-]+`, max 128 chars                                        |
-| `CLAUDE_SANDBOX_DETACH`    | Case-insensitive `"true"` or `"false"`                                   |
-| `ANTHROPIC_API_KEY`        | Must start with `sk-ant-api03-`                                          |
-| `CLAUDE_CODE_OAUTH_TOKEN`  | Must start with `sk-ant-oat01-`                                          |
+| Variable                    | Validation Rule                                                     |
+| --------------------------- | ------------------------------------------------------------------- |
+| `CLAUDE_SANDBOX_CONFIG_DIR` | Valid filesystem path; parent directory must exist; will be created |
+| `CLAUDE_SANDBOX_WORKSPACE`  | Must be an existing directory (resolved to absolute path)           |
+| `CLAUDE_SANDBOX_IMAGE`      | `[a-z0-9._\-/]+` (Docker image name format), max 256 chars          |
+| `CLAUDE_SANDBOX_TAG`        | `[a-zA-Z0-9._\-]+`, max 128 chars                                   |
+| `CLAUDE_SANDBOX_DETACH`     | Case-insensitive `"true"` or `"false"`                              |
+| `ANTHROPIC_API_KEY`         | Must start with `sk-ant-api03-`                                     |
+| `CLAUDE_CODE_OAUTH_TOKEN`   | Must start with `sk-ant-oat01-`                                     |
 
 ---
 

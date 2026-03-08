@@ -42,10 +42,14 @@ function bumpVersion(version, type) {
     }
     const [major, minor, patch] = parts;
     switch (type) {
-        case 'major': return `${major + 1}.0.0`;
-        case 'minor': return `${major}.${minor + 1}.0`;
-        case 'patch': return `${major}.${minor}.${patch + 1}`;
-        default: throw new Error(`Unknown bump type: ${type}`);
+        case 'major':
+            return `${major + 1}.0.0`;
+        case 'minor':
+            return `${major}.${minor + 1}.0`;
+        case 'patch':
+            return `${major}.${minor}.${patch + 1}`;
+        default:
+            throw new Error(`Unknown bump type: ${type}`);
     }
 }
 
@@ -56,14 +60,8 @@ function validateSemver(v) {
 // YYYYMMDDHHmm — precise enough to avoid collisions, short enough to read
 function buildTimestamp() {
     const now = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    return (
-        `${now.getFullYear()}` +
-        `${pad(now.getMonth() + 1)}` +
-        `${pad(now.getDate())}` +
-        `${pad(now.getHours())}` +
-        `${pad(now.getMinutes())}`
-    );
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${now.getFullYear()}` + `${pad(now.getMonth() + 1)}` + `${pad(now.getDate())}` + `${pad(now.getHours())}` + `${pad(now.getMinutes())}`;
 }
 
 function run(cmd, opts = {}) {
@@ -80,7 +78,7 @@ function createRl() {
 }
 
 function ask(rl, question) {
-    return new Promise(resolve => rl.question(question, answer => resolve(answer.trim())));
+    return new Promise((resolve) => rl.question(question, (answer) => resolve(answer.trim())));
 }
 
 async function pickOption(rl, question, options) {
@@ -97,13 +95,13 @@ async function pickOption(rl, question, options) {
 
 async function flowVersionsUpdate(rl) {
     const dockerPkgPath = path.join(ROOT, 'apps', 'docker', 'package.json');
-    const cliPkgPath    = path.join(ROOT, 'apps', 'cli', 'package.json');
+    const cliPkgPath = path.join(ROOT, 'apps', 'cli', 'package.json');
 
     const currentDockerVersion = readJson(dockerPkgPath).version;
-    const currentCliVersion    = readJson(cliPkgPath).version;
-    const newCliVersion        = bumpVersion(currentCliVersion, 'patch');
-    const timestamp            = buildTimestamp();
-    const rebuildTag           = `docker-v${currentDockerVersion}-rebuild${timestamp}`;
+    const currentCliVersion = readJson(cliPkgPath).version;
+    const newCliVersion = bumpVersion(currentCliVersion, 'patch');
+    const timestamp = buildTimestamp();
+    const rebuildTag = `docker-v${currentDockerVersion}-rebuild${timestamp}`;
 
     console.log(`\n  versions.json rebuild flow:`);
     console.log(`  Docker: keep v${currentDockerVersion}  (tag: ${rebuildTag})`);
@@ -143,22 +141,17 @@ async function flowVersionsUpdate(rl) {
 
 async function flowVersionBump(rl, target) {
     const releaseDocker = target !== 'CLI only';
-    const releaseCli    = target !== 'Docker only';
+    const releaseCli = target !== 'Docker only';
 
     const dockerPkgPath = path.join(ROOT, 'apps', 'docker', 'package.json');
-    const cliPkgPath    = path.join(ROOT, 'apps', 'cli', 'package.json');
+    const cliPkgPath = path.join(ROOT, 'apps', 'cli', 'package.json');
 
     let dockerVersion, cliVersion;
 
     if (releaseDocker) {
         const currentDockerVersion = readJson(dockerPkgPath).version;
         console.log(`\n  Current Docker version: ${currentDockerVersion}`);
-        const bumpType = await pickOption(rl, 'Version bump for Docker?', [
-            'patch',
-            'minor',
-            'major',
-            'custom',
-        ]);
+        const bumpType = await pickOption(rl, 'Version bump for Docker?', ['patch', 'minor', 'major', 'custom']);
         if (bumpType === 'custom') {
             while (true) {
                 dockerVersion = await ask(rl, '  Enter Docker version (e.g. 1.2.3): ');
@@ -174,11 +167,7 @@ async function flowVersionBump(rl, target) {
     if (releaseCli) {
         // If "both", offer to reuse the Docker version
         if (releaseDocker) {
-            const sameVersion = await pickOption(
-                rl,
-                `\nUse same version (${dockerVersion}) for CLI?`,
-                ['Yes', 'No (pick separately)']
-            );
+            const sameVersion = await pickOption(rl, `\nUse same version (${dockerVersion}) for CLI?`, ['Yes', 'No (pick separately)']);
             if (sameVersion === 'Yes') {
                 cliVersion = dockerVersion;
                 console.log(`  CLI → ${cliVersion}`);
@@ -188,12 +177,7 @@ async function flowVersionBump(rl, target) {
         if (!cliVersion) {
             const currentCliVersion = readJson(cliPkgPath).version;
             console.log(`\n  Current CLI version: ${currentCliVersion}`);
-            const bumpType = await pickOption(rl, 'Version bump for CLI?', [
-                'patch',
-                'minor',
-                'major',
-                'custom',
-            ]);
+            const bumpType = await pickOption(rl, 'Version bump for CLI?', ['patch', 'minor', 'major', 'custom']);
             if (bumpType === 'custom') {
                 while (true) {
                     cliVersion = await ask(rl, '  Enter CLI version (e.g. 1.2.3): ');
@@ -210,7 +194,7 @@ async function flowVersionBump(rl, target) {
     // Confirm
     console.log('\n  ─────────────────────────────────');
     if (releaseDocker) console.log(`  Docker: apps/docker/package.json → ${dockerVersion}  (tag: docker-v${dockerVersion})`);
-    if (releaseCli)   console.log(`  CLI:    apps/cli/package.json    → ${cliVersion}  (tag: cli-v${cliVersion})`);
+    if (releaseCli) console.log(`  CLI:    apps/cli/package.json    → ${cliVersion}  (tag: cli-v${cliVersion})`);
     console.log('  ─────────────────────────────────');
     if (DRY_RUN) console.log('  (dry run — nothing will actually happen)');
 
@@ -237,7 +221,7 @@ async function flowVersionBump(rl, target) {
     // Git commit
     const changedFiles = [];
     if (releaseDocker) changedFiles.push('apps/docker/package.json');
-    if (releaseCli)    changedFiles.push('apps/cli/package.json');
+    if (releaseCli) changedFiles.push('apps/cli/package.json');
 
     let commitMsg;
     if (releaseDocker && releaseCli) {
@@ -254,13 +238,13 @@ async function flowVersionBump(rl, target) {
     // Push commit, then tags (Docker first for "both")
     run('git push');
     if (releaseDocker) run(`git tag -a docker-v${dockerVersion} -m "Docker release v${dockerVersion}"`);
-    if (releaseCli)    run(`git tag -a cli-v${cliVersion} -m "CLI release v${cliVersion}"`);
+    if (releaseCli) run(`git tag -a cli-v${cliVersion} -m "CLI release v${cliVersion}"`);
     if (releaseDocker) run(`git push origin docker-v${dockerVersion}`);
-    if (releaseCli)    run(`git push origin cli-v${cliVersion}`);
+    if (releaseCli) run(`git push origin cli-v${cliVersion}`);
 
     console.log('\n  ✔ Done!\n');
     if (releaseDocker) console.log(`  Docker build:  https://github.com/yar-on/claude-code-sandbox/actions`);
-    if (releaseCli)    console.log(`  CLI publish:   https://github.com/yar-on/claude-code-sandbox/actions`);
+    if (releaseCli) console.log(`  CLI publish:   https://github.com/yar-on/claude-code-sandbox/actions`);
     console.log('');
 }
 
@@ -327,7 +311,7 @@ async function main() {
     }
 }
 
-main().catch(err => {
+main().catch((err) => {
     console.error('\n  ✖', err.message);
     process.exit(1);
 });

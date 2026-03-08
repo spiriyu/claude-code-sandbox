@@ -1,6 +1,7 @@
 # Implementation Progress
 
 ## Status Key
+
 - [x] Not started
 - [~] In progress
 - [x] Complete
@@ -82,9 +83,9 @@ Single-container commands.
 ## Decisions (Resolved)
 
 1. **`shell` vs `attach`** — Keep both.
-   - `attach` = connect to the container's main process (entrypoint / Claude Code runner)
-   - `shell` = open a new ephemeral bash session (`docker exec`); exiting kills the bash process
-     but NOT the container
+    - `attach` = connect to the container's main process (entrypoint / Claude Code runner)
+    - `shell` = open a new ephemeral bash session (`docker exec`); exiting kills the bash process
+      but NOT the container
 
 2. **`start` default behavior** — Start in the background, print status. No auto-attach.
    User runs `attach` separately to connect to the Claude Code process.

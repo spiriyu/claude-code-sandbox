@@ -20,8 +20,8 @@ Detailed docs live in `docs/`. Read these before making non-trivial changes:
 
 NX monorepo (lightweight — orchestrator only, no plugins):
 
-| Package                  | Path           | Purpose                                    |
-| ------------------------ | -------------- | ------------------------------------------ |
+| Package                               | Path           | Purpose                                    |
+| ------------------------------------- | -------------- | ------------------------------------------ |
 | `@claude-code-sandbox/cli`            | `apps/cli/`    | npm CLI for managing the sandbox container |
 | `@spiriyu/claude-code-sandbox-docker` | `apps/docker/` | Dockerfile + CI/CD for Docker Hub          |
 | `@spiriyu/claude-code-sandbox-shared` | `libs/shared/` | Shared versions.json + helper exports      |

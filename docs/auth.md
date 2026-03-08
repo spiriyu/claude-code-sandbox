@@ -63,11 +63,11 @@ Shows:
 
 ## Security Model
 
-| What             | Where stored                                    | Who can read      |
-| ---------------- | ----------------------------------------------- | ----------------- |
+| What             | Where stored                                         | Who can read      |
+| ---------------- | ---------------------------------------------------- | ----------------- |
 | Auth token       | Env var or `~/.claude-code-sandbox/.env` (chmod 600) | Current user only |
 | Config settings  | `~/.claude-code-sandbox/config.json`                 | Current user      |
-| **Never** stored | `conf` config store                             | —                 |
+| **Never** stored | `conf` config store                                  | —                 |
 
 The `conf` config store (`~/.claude-code-sandbox/config.json`) deliberately never contains credentials. `claude-code-sandbox config list` is safe to share.
 

@@ -33,15 +33,15 @@ Tags are created by running `npm run release` at the workspace root (see [releas
 
 ```yaml
 on:
-  push:
-    tags: ['docker-v*']
+    push:
+        tags: ['docker-v*']
 ```
 
 ### Environment
 
 ```yaml
 env:
-  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/claude-code-sandbox
+    DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/claude-code-sandbox
 ```
 
 ### Job: `prepare`
@@ -49,8 +49,8 @@ env:
 1. Checkout repository
 2. Set up Node.js 22
 3. Extract version from tag — strips `docker-v` prefix and any `-rebuild<timestamp>` suffix:
-   - `docker-v1.0.0` → `1.0.0`, `is_rebuild=false`
-   - `docker-v1.0.0-rebuild202603071430` → `1.0.0`, `is_rebuild=true`
+    - `docker-v1.0.0` → `1.0.0`, `is_rebuild=false`
+    - `docker-v1.0.0-rebuild202603071430` → `1.0.0`, `is_rebuild=true`
 4. Run `node apps/docker/scripts/generate-matrix.js` with `RELEASE_VERSION=1.0.0`
 5. Output: `matrix` JSON + `version` + `is_rebuild` passed to downstream jobs
 
@@ -81,8 +81,8 @@ Runs after all `build` jobs complete. Creates a GitHub Release titled "Docker vX
 
 ```yaml
 on:
-  push:
-    tags: ['cli-v*']
+    push:
+        tags: ['cli-v*']
 ```
 
 ### Steps
@@ -100,11 +100,11 @@ on:
 
 Set in: GitHub repo → Settings → Secrets and variables → Actions → New repository secret.
 
-| Secret               | Used by              | Value                                                                                        |
-|----------------------|----------------------|----------------------------------------------------------------------------------------------|
-| `DOCKERHUB_USERNAME` | `docker-publish.yml` | Your Docker Hub username (`spiriyu`)                                                         |
-| `DOCKERHUB_TOKEN`    | `docker-publish.yml` | Docker Hub → Account Settings → Personal access tokens → Generate new token (Read & Write)  |
-| `NPM_TOKEN`          | `cli-publish.yml`    | npmjs.com → avatar → Access Tokens → Generate New Token → **Automation** type               |
+| Secret               | Used by              | Value                                                                                      |
+| -------------------- | -------------------- | ------------------------------------------------------------------------------------------ |
+| `DOCKERHUB_USERNAME` | `docker-publish.yml` | Your Docker Hub username (`spiriyu`)                                                       |
+| `DOCKERHUB_TOKEN`    | `docker-publish.yml` | Docker Hub → Account Settings → Personal access tokens → Generate new token (Read & Write) |
+| `NPM_TOKEN`          | `cli-publish.yml`    | npmjs.com → avatar → Access Tokens → Generate New Token → **Automation** type              |
 
 `GITHUB_TOKEN` (used for GitHub Release creation) is provided automatically — no setup needed.
 

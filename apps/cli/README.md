@@ -24,20 +24,20 @@ npx @claude-code-sandbox/cli <command>
 
 These options are available on every command:
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `-w, --workspace <path>` | Workspace directory | current working directory |
-| `--id <id>` | Target a specific container by ID or 8-char short ID | — |
-| `--config-dir <path>` | Config directory | `~/.claude-code-sandbox` |
-| `-v, --version` | Print version | — |
-| `-h, --help` | Show help | — |
+| Option                   | Description                                          | Default                   |
+| ------------------------ | ---------------------------------------------------- | ------------------------- |
+| `-w, --workspace <path>` | Workspace directory                                  | current working directory |
+| `--id <id>`              | Target a specific container by ID or 8-char short ID | —                         |
+| `--config-dir <path>`    | Config directory                                     | `~/.claude-code-sandbox`  |
+| `-v, --version`          | Print version                                        | —                         |
+| `-h, --help`             | Show help                                            | —                         |
 
 Environment variable overrides:
 
-| Variable | Overrides |
-|----------|-----------|
+| Variable                         | Overrides      |
+| -------------------------------- | -------------- |
 | `CLAUDE_CODE_SANDBOX_CONFIG_DIR` | `--config-dir` |
-| `CLAUDE_CODE_SANDBOX_WORKSPACE` | `--workspace` |
+| `CLAUDE_CODE_SANDBOX_WORKSPACE`  | `--workspace`  |
 
 ---
 
@@ -88,6 +88,7 @@ claude-code-sandbox
 ```
 
 **Navigation:**
+
 - Arrow keys / Enter to select
 - **ESC** at any prompt to cancel and return to the menu without performing any action
 - **Ctrl+C** or select **Exit** to quit
@@ -106,11 +107,11 @@ Start or resume a container for the current workspace.
 claude-code-sandbox start [options]
 ```
 
-| Option | Description |
-|--------|-------------|
+| Option            | Description                                                |
+| ----------------- | ---------------------------------------------------------- |
 | `--image <image>` | Docker image name (default: `spiriyu/claude-code-sandbox`) |
-| `--tag <tag>` | Docker image tag (default: `latest`) |
-| `--pull` | Force pull image before starting |
+| `--tag <tag>`     | Docker image tag (default: `latest`)                       |
+| `--pull`          | Force pull image before starting                           |
 
 - If a container already exists for the workspace, it is resumed instead of creating a new one.
 - If multiple containers match, an interactive picker is shown.
@@ -137,8 +138,8 @@ Stop the active container.
 claude-code-sandbox stop [options]
 ```
 
-| Option | Description |
-|--------|-------------|
+| Option             | Description                                        |
+| ------------------ | -------------------------------------------------- |
 | `--timeout <secs>` | Seconds to wait before force-killing (default: 10) |
 
 Container selection order: `--id` → `currentContainerId` (set via `use`) → workspace match → interactive picker.
@@ -163,8 +164,8 @@ Stop all currently running containers.
 claude-code-sandbox stop-all [options]
 ```
 
-| Option | Description |
-|--------|-------------|
+| Option             | Description                                                       |
+| ------------------ | ----------------------------------------------------------------- |
 | `--timeout <secs>` | Seconds to wait before force-killing each container (default: 10) |
 
 ---
@@ -177,8 +178,8 @@ Remove a container from Docker and mark it removed in the config.
 claude-code-sandbox remove [options]
 ```
 
-| Option | Description |
-|--------|-------------|
+| Option    | Description              |
+| --------- | ------------------------ |
 | `--force` | Skip confirmation prompt |
 
 Container selection: same resolution order as `stop`. Prompts for confirmation unless `--force`.
@@ -217,8 +218,8 @@ List all active (non-removed) containers.
 claude-code-sandbox ls [options]
 ```
 
-| Option | Description |
-|--------|-------------|
+| Option   | Description    |
+| -------- | -------------- |
 | `--json` | Output as JSON |
 
 Shows ID, name, workspace, status, and time since last update.
@@ -233,8 +234,8 @@ List all containers including removed ones.
 claude-code-sandbox history [options]
 ```
 
-| Option | Description |
-|--------|-------------|
+| Option   | Description    |
+| -------- | -------------- |
 | `--json` | Output as JSON |
 
 Reads from config only (no Docker check required). Useful for auditing past sessions.
@@ -250,10 +251,10 @@ claude-code-sandbox use [id]
 claude-code-sandbox use --clear
 ```
 
-| Option / Argument | Description |
-|--------|-------------|
-| `[id]` | Container ID or short ID to select directly |
-| `--clear` | Clear the current selection |
+| Option / Argument | Description                                 |
+| ----------------- | ------------------------------------------- |
+| `[id]`            | Container ID or short ID to select directly |
+| `--clear`         | Clear the current selection                 |
 
 When no `[id]` is given, an interactive picker shows all Docker-verified containers. The selected container becomes the target for `stop`, `attach`, `shell`, and `remove` until changed.
 
@@ -271,10 +272,10 @@ Guides you through choosing an auth method and storing credentials in `~/.claude
 
 **Supported methods:**
 
-| Method | Variable | How to get |
-|--------|----------|------------|
-| API Key | `ANTHROPIC_API_KEY` | [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) |
-| OAuth Token | `CLAUDE_CODE_OAUTH_TOKEN` | Claude Pro/Max — run `claude setup-token` |
+| Method      | Variable                  | How to get                                                                         |
+| ----------- | ------------------------- | ---------------------------------------------------------------------------------- |
+| API Key     | `ANTHROPIC_API_KEY`       | [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) |
+| OAuth Token | `CLAUDE_CODE_OAUTH_TOKEN` | Claude Pro/Max — run `claude setup-token`                                          |
 
 Press **ESC** at any prompt during setup to cancel and return without saving.
 
@@ -322,13 +323,13 @@ claude-code-sandbox config set <key> <value>
 
 **Available settings:**
 
-| Key | Description | Default |
-|-----|-------------|---------|
-| `defaultImage` | Docker image name | `spiriyu/claude-code-sandbox` |
-| `defaultTag` | Docker image tag | `latest` |
-| `authMethod` | Preferred auth method (`api_key`, `oauth_token`, or `null`) | `null` |
-| `gitUserName` | Git user name passed into containers | `null` |
-| `gitUserEmail` | Git user email passed into containers | `null` |
+| Key            | Description                                                 | Default                       |
+| -------------- | ----------------------------------------------------------- | ----------------------------- |
+| `defaultImage` | Docker image name                                           | `spiriyu/claude-code-sandbox` |
+| `defaultTag`   | Docker image tag                                            | `latest`                      |
+| `authMethod`   | Preferred auth method (`api_key`, `oauth_token`, or `null`) | `null`                        |
+| `gitUserName`  | Git user name passed into containers                        | `null`                        |
+| `gitUserEmail` | Git user email passed into containers                       | `null`                        |
 
 ```bash
 # Use a different default image tag

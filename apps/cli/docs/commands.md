@@ -4,13 +4,13 @@
 
 Accepted before any subcommand. All have env var fallbacks.
 
-| Flag                    | Env Var                    | Default              | Description                          |
-|-------------------------|----------------------------|----------------------|--------------------------------------|
-| `-w, --workspace <path>`| `CLAUDE_SANDBOX_WORKSPACE` | `process.cwd()`      | Workspace directory to mount         |
-| `--id <id>`             | —                          | —                    | Target container by UUID or short ID |
-| `--config-dir <path>`   | `CLAUDE_SANDBOX_CONFIG_DIR`| `~/.claude-code-sandbox` | Config directory             |
-| `-h, --help`            | —                          | —                    | Show help                            |
-| `-V, --version`         | —                          | —                    | Show version                         |
+| Flag                     | Env Var                     | Default                  | Description                          |
+| ------------------------ | --------------------------- | ------------------------ | ------------------------------------ |
+| `-w, --workspace <path>` | `CLAUDE_SANDBOX_WORKSPACE`  | `process.cwd()`          | Workspace directory to mount         |
+| `--id <id>`              | —                           | —                        | Target container by UUID or short ID |
+| `--config-dir <path>`    | `CLAUDE_SANDBOX_CONFIG_DIR` | `~/.claude-code-sandbox` | Config directory                     |
+| `-h, --help`             | —                           | —                        | Show help                            |
+| `-V, --version`          | —                           | —                        | Show version                         |
 
 ---
 
@@ -38,15 +38,16 @@ Start the selected container. Creates a new one if none exists for the workspace
 claude-code-sandbox start [options]
 ```
 
-| Flag                  | Env Var                  | Default                         | Description                |
-|-----------------------|--------------------------|---------------------------------|----------------------------|
-| `-w, --workspace <p>` | `CLAUDE_SANDBOX_WORKSPACE` | cwd                           | Workspace to mount         |
-| `--pull`              | —                        | false                           | Force pull latest image    |
-| `--image <image>`     | `CLAUDE_SANDBOX_IMAGE`   | `spiriyu/claude-code-sandbox`   | Docker image name          |
-| `--tag <tag>`         | `CLAUDE_SANDBOX_TAG`     | `latest`                        | Image tag                  |
-| `-d, --detach`        | `CLAUDE_SANDBOX_DETACH`  | false                           | Run in background          |
+| Flag                  | Env Var                    | Default                       | Description             |
+| --------------------- | -------------------------- | ----------------------------- | ----------------------- |
+| `-w, --workspace <p>` | `CLAUDE_SANDBOX_WORKSPACE` | cwd                           | Workspace to mount      |
+| `--pull`              | —                          | false                         | Force pull latest image |
+| `--image <image>`     | `CLAUDE_SANDBOX_IMAGE`     | `spiriyu/claude-code-sandbox` | Docker image name       |
+| `--tag <tag>`         | `CLAUDE_SANDBOX_TAG`       | `latest`                      | Image tag               |
+| `-d, --detach`        | `CLAUDE_SANDBOX_DETACH`    | false                         | Run in background       |
 
 **Behavior:**
+
 1. Validate workspace (must exist and be a directory, resolved to absolute path)
 2. Sync Docker state for known containers
 3. Find container for workspace in config
@@ -57,6 +58,7 @@ claude-code-sandbox start [options]
 8. If `--detach` → print container ID and status; else → attach stdout/stderr to terminal (Ctrl+C detaches without killing)
 
 **Validation:**
+
 - Workspace: existing directory
 - Image: valid Docker image name (`[registry/]name`, max 256 chars, `[a-z0-9._\-/]+`)
 - Tag: `[a-zA-Z0-9._\-]+`, max 128 chars
@@ -74,6 +76,7 @@ claude-code-sandbox stop [options]
 Uses standard container selection (see above). No additional flags.
 
 **Behavior:**
+
 1. Resolve target container
 2. Sync Docker state
 3. If not running → info message and exit cleanly
@@ -93,11 +96,12 @@ claude-code-sandbox start-all
 No container selection flags — operates on all.
 
 **Behavior:**
+
 1. Load all `ContainerRecord` where `removedAt === null`
 2. Sync Docker states
 3. For each container with `lastStatus !== 'running'`:
-   - Attempt `container.start()`
-   - Print ✓ or ✗ per container
+    - Attempt `container.start()`
+    - Print ✓ or ✗ per container
 4. Update config with new statuses
 5. Summary: "Started N/M containers"
 
@@ -114,11 +118,12 @@ claude-code-sandbox stop-all
 No container selection flags.
 
 **Behavior:**
+
 1. Load all non-removed containers
 2. Sync Docker states
 3. For each `lastStatus === 'running'`:
-   - `container.stop()`
-   - Print ✓ or ✗ per container
+    - `container.stop()`
+    - Print ✓ or ✗ per container
 4. Update config
 5. Summary: "Stopped N containers"
 
@@ -133,11 +138,12 @@ Remove a container from Docker (frees disk space). Container is soft-deleted in 
 claude-code-sandbox remove [options]
 ```
 
-| Flag            | Description                  |
-|-----------------|------------------------------|
-| `-f, --force`   | Skip confirmation prompt     |
+| Flag          | Description              |
+| ------------- | ------------------------ |
+| `-f, --force` | Skip confirmation prompt |
 
 **Behavior:**
+
 1. Resolve target container via standard selection
 2. Unless `--force`: prompt "Remove container <id> for workspace <path>? [y/N]"
 3. If `lastStatus === 'running'` → `container.stop()` first
@@ -163,6 +169,7 @@ claude-code-sandbox attach [options]
 Uses standard container selection.
 
 **Behavior:**
+
 1. Resolve target container
 2. Sync Docker state — container must be `running` (error otherwise, with hint to run `start`)
 3. Set terminal to raw mode (`process.stdin.setRawMode(true)`)
@@ -181,9 +188,9 @@ List all active (non-removed) containers.
 claude-code-sandbox ls [options]
 ```
 
-| Flag       | Description                          |
-|------------|--------------------------------------|
-| `--json`   | Output as JSON array                 |
+| Flag     | Description          |
+| -------- | -------------------- |
+| `--json` | Output as JSON array |
 
 **Output columns (table mode):**
 
@@ -194,6 +201,7 @@ b2c3d4e5  /home/user/otherapp      exited    claude-code-sandbox:latest  1d ago
 ```
 
 **Behavior:**
+
 1. Load config
 2. Sync Docker states
 3. Filter `removedAt === null`
@@ -209,9 +217,9 @@ List all containers including removed ones.
 claude-code-sandbox history [options]
 ```
 
-| Flag       | Description          |
-|------------|----------------------|
-| `--json`   | Output as JSON array |
+| Flag     | Description          |
+| -------- | -------------------- |
+| `--json` | Output as JSON array |
 
 **Output columns (table mode):**
 
@@ -233,22 +241,24 @@ or cleared.
 claude-code-sandbox use [id]
 ```
 
-| Flag        | Description                       |
-|-------------|-----------------------------------|
-| `--clear`   | Clear the current selection       |
+| Flag      | Description                 |
+| --------- | --------------------------- |
+| `--clear` | Clear the current selection |
 
 **Behavior:**
+
 1. Verify Docker is running (error if not)
 2. If `id` argument provided → validate + set directly (skip interactive)
 3. If no argument → show interactive list:
-   - Query Docker for all containers managed by this CLI (from config)
-   - Include containers that exist in Docker regardless of running/paused state
-   - **Exclude containers that no longer exist in Docker** (only show Docker-confirmed ones)
-   - Exclude removed containers (`removedAt !== null`)
+    - Query Docker for all containers managed by this CLI (from config)
+    - Include containers that exist in Docker regardless of running/paused state
+    - **Exclude containers that no longer exist in Docker** (only show Docker-confirmed ones)
+    - Exclude removed containers (`removedAt !== null`)
 4. User picks from list → save `currentContainerId` in config
 5. With `--clear` → set `currentContainerId = null` in config
 
 **Interactive list format:**
+
 ```
 ? Select a container: (Use arrow keys)
 ❯ a1b2c3d4  /home/user/proj1   running   started 2h ago
@@ -257,6 +267,7 @@ claude-code-sandbox use [id]
 ```
 
 **`ls` marks the currently selected container with `*`:**
+
 ```
   ID        WORKSPACE           STATUS    IMAGE:TAG                   CREATED
 * a1b2c3d4  /home/user/proj1    running   claude-code-sandbox:latest  2h ago
@@ -291,11 +302,11 @@ claude-code-sandbox config reset [key]
 
 **Valid keys:**
 
-| Key            | Default                         | Env Override             |
-|----------------|---------------------------------|--------------------------|
-| `defaultImage` | `spiriyu/claude-code-sandbox`   | `CLAUDE_SANDBOX_IMAGE`   |
-| `defaultTag`   | `latest`                        | `CLAUDE_SANDBOX_TAG`     |
-| `authMethod`   | null                            | —                        |
+| Key            | Default                       | Env Override           |
+| -------------- | ----------------------------- | ---------------------- |
+| `defaultImage` | `spiriyu/claude-code-sandbox` | `CLAUDE_SANDBOX_IMAGE` |
+| `defaultTag`   | `latest`                      | `CLAUDE_SANDBOX_TAG`   |
+| `authMethod`   | null                          | —                      |
 
 ---
 

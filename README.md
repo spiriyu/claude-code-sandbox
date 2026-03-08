@@ -23,13 +23,13 @@ Claude Code is powerful — but running an AI agent that can execute arbitrary c
 
 ## How Developers Benefit
 
-| Problem                           | Without Claude Sandbox | With Claude Sandbox             |
-| --------------------------------- | ---------------------- | ------------------------------- |
-| AI agent modifies system files    | Direct risk            | Contained in Docker             |
-| Different Node/Python per project | Version conflicts      | Pick the right image tag        |
-| Share Claude setup with team      | "Works on my machine"  | Reproducible image              |
+| Problem                           | Without Claude Sandbox | With Claude Sandbox                  |
+| --------------------------------- | ---------------------- | ------------------------------------ |
+| AI agent modifies system files    | Direct risk            | Contained in Docker                  |
+| Different Node/Python per project | Version conflicts      | Pick the right image tag             |
+| Share Claude setup with team      | "Works on my machine"  | Reproducible image                   |
 | Try Claude Code quickly           | Install + configure    | `npx @claude-code-sandbox/cli start` |
-| Rotate credentials safely         | Stored in host shell   | Isolated per session            |
+| Rotate credentials safely         | Stored in host shell   | Isolated per session                 |
 
 ---
 
@@ -63,25 +63,25 @@ claude-code-sandbox
 
 ## CLI Commands
 
-| Command                              | Description                                            |
-| ------------------------------------ | ------------------------------------------------------ |
-| `claude-code-sandbox`                | Open interactive TUI menu                              |
-| `claude-code-sandbox start`          | Pull image (if needed) and start/resume a container    |
-| `claude-code-sandbox stop`           | Stop the active container                              |
-| `claude-code-sandbox start-all`      | Start all stopped containers                           |
-| `claude-code-sandbox stop-all`       | Stop all running containers                            |
-| `claude-code-sandbox remove`         | Remove a container from Docker and config              |
-| `claude-code-sandbox attach`         | Attach terminal to the Claude Code process             |
-| `claude-code-sandbox shell`          | Open a bash session inside the container               |
-| `claude-code-sandbox ls`             | List active containers                                 |
-| `claude-code-sandbox history`        | List all containers including removed ones             |
-| `claude-code-sandbox use [id]`       | Set the active container for the current session       |
-| `claude-code-sandbox auth setup`     | Interactive credential setup wizard                    |
-| `claude-code-sandbox auth status`    | Show stored credentials                                |
-| `claude-code-sandbox config list`    | Show all settings                                      |
-| `claude-code-sandbox config get <key>` | Get a single setting value                           |
-| `claude-code-sandbox config set <key> <value>` | Override a setting                       |
-| `claude-code-sandbox config reset [key]` | Reset one or all settings to defaults            |
+| Command                                        | Description                                         |
+| ---------------------------------------------- | --------------------------------------------------- |
+| `claude-code-sandbox`                          | Open interactive TUI menu                           |
+| `claude-code-sandbox start`                    | Pull image (if needed) and start/resume a container |
+| `claude-code-sandbox stop`                     | Stop the active container                           |
+| `claude-code-sandbox start-all`                | Start all stopped containers                        |
+| `claude-code-sandbox stop-all`                 | Stop all running containers                         |
+| `claude-code-sandbox remove`                   | Remove a container from Docker and config           |
+| `claude-code-sandbox attach`                   | Attach terminal to the Claude Code process          |
+| `claude-code-sandbox shell`                    | Open a bash session inside the container            |
+| `claude-code-sandbox ls`                       | List active containers                              |
+| `claude-code-sandbox history`                  | List all containers including removed ones          |
+| `claude-code-sandbox use [id]`                 | Set the active container for the current session    |
+| `claude-code-sandbox auth setup`               | Interactive credential setup wizard                 |
+| `claude-code-sandbox auth status`              | Show stored credentials                             |
+| `claude-code-sandbox config list`              | Show all settings                                   |
+| `claude-code-sandbox config get <key>`         | Get a single setting value                          |
+| `claude-code-sandbox config set <key> <value>` | Override a setting                                  |
+| `claude-code-sandbox config reset [key]`       | Reset one or all settings to defaults               |
 
 Global options available on every command:
 
@@ -126,7 +126,7 @@ You need one of:
 | Method      | Variable                  | How to get                                                                         |
 | ----------- | ------------------------- | ---------------------------------------------------------------------------------- |
 | API Key     | `ANTHROPIC_API_KEY`       | [console.anthropic.com/settings/keys](https://console.anthropic.com/settings/keys) |
-| OAuth Token | `CLAUDE_CODE_OAUTH_TOKEN` | Claude Pro/Max — run `claude setup-token` inside the container                    |
+| OAuth Token | `CLAUDE_CODE_OAUTH_TOKEN` | Claude Pro/Max — run `claude setup-token` inside the container                     |
 
 Run `claude-code-sandbox auth setup` for an interactive setup guide. Credentials are stored in `~/.claude-code-sandbox/.env` (chmod 600) and never written to the config store.
 
