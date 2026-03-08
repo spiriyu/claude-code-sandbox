@@ -30,7 +30,7 @@ function resolveDockerImageVersion(): string {
         // Traverse up to monorepo root: ../../../../apps/docker/package.json
         const thisDir = fileURLToPath(new URL('.', import.meta.url));
         const pkgPath = join(thisDir, '..', '..', '..', '..', 'apps', 'docker', 'package.json');
-        const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+        const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as { version: string };
         return pkg.version;
     } catch {
         return 'latest';

@@ -85,7 +85,7 @@ describe('findContainerById', () => {
         const found = findContainerById(cfg2, 'a1b2c3d4');
         // Must find one of them (not undefined)
         expect(found).toBeDefined();
-        expect([id1, id2]).toContain(found!.id);
+        expect([id1, id2]).toContain(found?.id);
     });
 });
 
@@ -189,7 +189,7 @@ describe('markContainerRemoved', () => {
         markContainerRemoved(cfg, 'a1b2c3d4-e5f6-7890-abcd-ef1234567890');
         const r = cfg.containers['a1b2c3d4-e5f6-7890-abcd-ef1234567890'];
         expect(r.removedAt).not.toBeNull();
-        expect(new Date(r.removedAt!).getTime()).toBeGreaterThan(0);
+        expect(new Date(r.removedAt as string).getTime()).toBeGreaterThan(0);
     });
 
     it('sets lastStatus to "removed"', () => {

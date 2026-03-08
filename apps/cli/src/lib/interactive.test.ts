@@ -10,7 +10,6 @@ import {
     CONTAINER_UNSET,
     runInteractiveMode,
     startWizard,
-    type StartWizardResult,
 } from './interactive.js';
 import { DEFAULT_CONFIG_DIR } from './constants.js';
 import { type ConfigFile } from './config-store.js';
@@ -250,9 +249,9 @@ describe('startWizard', () => {
 
         const result = await startWizard('/tmp', defaultSettings);
         expect(result).not.toBeNull();
-        expect(result!.workspace).toBe('/tmp');
-        expect(result!.image).toBe('spiriyu/claude-code-sandbox');
-        expect(result!.tag).toMatch(/^.+_node22_python3\.12$/);
+        expect(result?.workspace).toBe('/tmp');
+        expect(result?.image).toBe('spiriyu/claude-code-sandbox');
+        expect(result?.tag).toMatch(/^.+_node22_python3\.12$/);
     });
 
     it('returns null when user declines confirmation', async () => {

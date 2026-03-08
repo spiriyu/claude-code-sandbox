@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { loadConfig, saveConfig, DEFAULT_CLEANUP_DAYS } from '../lib/config-store.js';
+import { loadConfig, saveConfig } from '../lib/config-store.js';
 import { getAllContainers } from '../lib/container-store.js';
 import { shortId } from '../lib/docker.js';
 import { logger } from '../utils/logger.js';
@@ -30,7 +30,7 @@ export function makeCleanupCommand(): Command {
 
             console.log(chalk.yellow(`\n  Found ${removed.length} container(s) removed more than ${days} days ago:`));
             for (const c of removed) {
-                const removedDate = new Date(c.removedAt!).toLocaleDateString();
+                const removedDate = new Date(c.removedAt as string).toLocaleDateString();
                 console.log(`    ${shortId(c.id)}  ${c.workspace.slice(-40).padEnd(40)}  removed ${removedDate}`);
             }
             console.log('');
