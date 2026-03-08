@@ -87,6 +87,27 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  update-dockerhub-readme:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Generate README
+        run: RELEASE_VERSION=${{ needs.prepare.outputs.version }} node apps/docker/scripts/generate-readme.js
+
+      - name: Update Docker Hub description
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ secrets.DOCKERHUB_USERNAME }}/claude-code-sandbox
+          readme-filepath: apps/docker/README.md
+
   release:
     needs: [prepare, build]
     # Skip GitHub Release creation for rebuild tags — the release already exists
