@@ -27,7 +27,7 @@ claude-code-sandbox/
 | ------------- | ------------------------------------- | --------------- | ------------------------ |
 | `apps/cli`    | `@claude-code-sandbox/cli`            | npm CLI         | TypeScript, tsup, vitest |
 | `apps/docker` | `@spiriyu/claude-code-sandbox-docker` | Docker image    | Bash, Dockerfile         |
-| `libs/shared` | `@claude-code-sandbox/shared` | Private library | TypeScript               |
+| `libs/shared` | `@claude-code-sandbox/shared`         | Private library | TypeScript               |
 
 ## Dependency Graph
 
@@ -71,11 +71,11 @@ This lets `apps/cli` import `@claude-code-sandbox/shared` as if it were a publis
 
 The CLI imports from `@claude-code-sandbox/shared` via three aligned configurations:
 
-| Tool                     | Config                                             | Alias                                                                    |
-| ------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------ |
+| Tool                     | Config                                             | Alias                                                            |
+| ------------------------ | -------------------------------------------------- | ---------------------------------------------------------------- |
 | Type-checker (`tsc`)     | `apps/cli/tsconfig.json` → `paths`                 | `@claude-code-sandbox/shared` → `../../libs/shared/src/index.ts` |
-| Bundler (`tsup`/esbuild) | `apps/cli/tsup.config.ts` → `esbuildOptions.alias` | same path                                                                |
-| Test runner (`vitest`)   | `apps/cli/vitest.config.ts` → `resolve.alias`      | same path                                                                |
+| Bundler (`tsup`/esbuild) | `apps/cli/tsup.config.ts` → `esbuildOptions.alias` | same path                                                        |
+| Test runner (`vitest`)   | `apps/cli/vitest.config.ts` → `resolve.alias`      | same path                                                        |
 
 `rootDir` is intentionally absent from `apps/cli/tsconfig.json` — having it would prevent `tsc --noEmit` from resolving cross-package paths. tsup manages the output directory (`dist/`) independently via its own `outDir` option.
 
