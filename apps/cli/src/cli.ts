@@ -6,6 +6,7 @@ import { makeStartAllCommand } from './commands/start-all.js';
 import { makeStopAllCommand } from './commands/stop-all.js';
 import { makeRemoveCommand } from './commands/remove.js';
 import { makeRemoveAllCommand } from './commands/remove-all.js';
+import { makeCleanupCommand } from './commands/cleanup.js';
 import { makeAttachCommand } from './commands/attach.js';
 import { makeShellCommand } from './commands/shell.js';
 import { makeLsCommand } from './commands/ls.js';
@@ -50,6 +51,7 @@ program.addCommand(makeLsCommand());
 program.addCommand(makeHistoryCommand());
 program.addCommand(makeUseCommand());
 program.addCommand(makeAuthCommand());
+program.addCommand(makeCleanupCommand());
 program.addCommand(makeConfigCommand());
 
 program.action(async function (this: Command) {

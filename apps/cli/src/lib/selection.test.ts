@@ -61,6 +61,7 @@ function makeConfig(records: ContainerRecord[], currentContainerId: string | nul
             currentContainerId,
             gitUserName: null,
             gitUserEmail: null,
+            cleanupDays: 10,
         },
     };
 }

@@ -141,6 +141,11 @@ describe('promptMainMenu', () => {
         expect(await promptMainMenu(mockProgram as unknown as Command)).toEqual(['__start-wizard__']);
     });
 
+    it("returns ['__cleanup__'] for 'cleanup'", async () => {
+        mockSelect.mockResolvedValueOnce('cleanup');
+        expect(await promptMainMenu(mockProgram as unknown as Command)).toEqual(['__cleanup__']);
+    });
+
     it("returns ['auth', 'setup'] for 'auth-setup'", async () => {
         mockSelect.mockResolvedValueOnce('auth-setup');
         expect(await promptMainMenu(mockProgram as unknown as Command)).toEqual(['auth', 'setup']);
@@ -172,7 +177,7 @@ describe('promptMainMenu', () => {
 // ─── promptContainerSelect ────────────────────────────────────────────────────
 
 describe('promptContainerSelect', () => {
-    const emptyConfig: ConfigFile = { version: 1, containers: {}, settings: { defaultImage: '', defaultTag: '', authMethod: null, currentContainerId: null, gitUserName: null, gitUserEmail: null } };
+    const emptyConfig: ConfigFile = { version: 1, containers: {}, settings: { defaultImage: '', defaultTag: '', authMethod: null, currentContainerId: null, gitUserName: null, gitUserEmail: null, cleanupDays: 10 } };
 
     beforeEach(() => {
         mockSelect.mockReset();
@@ -199,6 +204,7 @@ describe('startWizard', () => {
         currentContainerId: null,
         gitUserName: null,
         gitUserEmail: null,
+        cleanupDays: 10,
     };
 
     beforeEach(() => {

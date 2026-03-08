@@ -4,18 +4,20 @@ import { join } from 'path';
 import { logger } from '../utils/logger.js';
 import { loadConfig, saveConfig } from '../lib/config-store.js';
 import { DEFAULT_IMAGE, DEFAULT_IMAGE_TAG } from '../lib/constants.js';
+import { DEFAULT_CLEANUP_DAYS } from '../lib/config-store.js';
 import { validateImageName, validateTag } from '../utils/validation.js';
 
-type SettingsKey = 'defaultImage' | 'defaultTag' | 'authMethod' | 'gitUserName' | 'gitUserEmail';
+type SettingsKey = 'defaultImage' | 'defaultTag' | 'authMethod' | 'gitUserName' | 'gitUserEmail' | 'cleanupDays';
 
-const VALID_KEYS: SettingsKey[] = ['defaultImage', 'defaultTag', 'authMethod', 'gitUserName', 'gitUserEmail'];
+const VALID_KEYS: SettingsKey[] = ['defaultImage', 'defaultTag', 'authMethod', 'gitUserName', 'gitUserEmail', 'cleanupDays'];
 
-const DEFAULTS: Record<SettingsKey, string | null> = {
+const DEFAULTS: Record<SettingsKey, string | number | null> = {
     defaultImage: DEFAULT_IMAGE,
     defaultTag: DEFAULT_IMAGE_TAG,
     authMethod: null,
     gitUserName: null,
     gitUserEmail: null,
+    cleanupDays: DEFAULT_CLEANUP_DAYS,
 };
 
 function validateValue(key: SettingsKey, value: string): string | null {
@@ -24,6 +26,12 @@ function validateValue(key: SettingsKey, value: string): string | null {
     if (key === 'authMethod') {
         if (!['api_key', 'oauth_token', 'null'].includes(value)) {
             return `authMethod must be "api_key", "oauth_token", or "null"`;
+        }
+    }
+    if (key === 'cleanupDays') {
+        const n = parseInt(value, 10);
+        if (isNaN(n) || n < 0) {
+            return `cleanupDays must be a non-negative integer`;
         }
     }
     return null;
@@ -39,7 +47,7 @@ export function makeConfigCommand(): Command {
             const g = this.optsWithGlobals();
             const config = loadConfig(String(g.configDir));
             const s = config.settings;
-            const display = { defaultImage: s.defaultImage, defaultTag: s.defaultTag, authMethod: s.authMethod, gitUserName: s.gitUserName, gitUserEmail: s.gitUserEmail };
+            const display = { defaultImage: s.defaultImage, defaultTag: s.defaultTag, authMethod: s.authMethod, gitUserName: s.gitUserName, gitUserEmail: s.gitUserEmail, cleanupDays: s.cleanupDays };
 
             if (opts.json) {
                 console.log(JSON.stringify(display, null, 2));
@@ -59,6 +67,7 @@ export function makeConfigCommand(): Command {
                 const tag = isDefault ? chalk.gray('default') : chalk.green('custom');
                 console.log(`  ${key.padEnd(16)} ${displayVal.padEnd(40)} ${tag}`);
             }
+            console.log(chalk.gray(`\n  Tip: "cleanupDays" controls how long removed containers are kept in history.`));
 
             logger.line();
             logger.blank();
@@ -73,7 +82,7 @@ export function makeConfigCommand(): Command {
                 process.exit(1);
             }
             const config = loadConfig(String(g.configDir));
-            const value = config.settings[key as SettingsKey];
+            const value = config.settings[key as keyof typeof config.settings];
             console.log(value === null ? '' : String(value));
         });
 
@@ -92,7 +101,9 @@ export function makeConfigCommand(): Command {
             }
 
             const config = loadConfig(String(g.configDir));
-            (config.settings as unknown as Record<string, string | null>)[key] = value === 'null' ? null : value;
+            let parsed: string | number | null = value === 'null' ? null : value;
+            if (key === 'cleanupDays') parsed = parseInt(value, 10);
+            (config.settings as unknown as Record<string, string | number | null>)[key] = parsed;
             saveConfig(config, String(g.configDir));
             logger.success(`Set ${key} = ${value}`);
         });
@@ -123,6 +134,7 @@ export function makeConfigCommand(): Command {
                 config.settings.authMethod = null;
                 config.settings.gitUserName = null;
                 config.settings.gitUserEmail = null;
+                config.settings.cleanupDays = DEFAULT_CLEANUP_DAYS;
                 saveConfig(config, String(g.configDir));
                 logger.success('All settings reset to defaults.');
             } else {

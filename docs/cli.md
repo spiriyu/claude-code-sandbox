@@ -35,6 +35,7 @@ apps/cli/src/
 │   ├── stop-all.ts         # claude-code-sandbox stop-all
 │   ├── remove.ts           # claude-code-sandbox remove
 │   ├── remove-all.ts       # claude-code-sandbox remove-all
+│   ├── cleanup.ts          # claude-code-sandbox cleanup
 │   ├── status.ts           # claude-code-sandbox status
 │   ├── shell.ts            # claude-code-sandbox shell
 │   ├── attach.ts           # claude-code-sandbox attach
@@ -105,6 +106,18 @@ Options:
   -f, --force   Skip confirmation prompt
 ```
 
+### `claude-code-sandbox cleanup`
+
+Permanently removes history records for containers that were removed more than N days ago. This cleans up the `config.json` file by deleting old `ContainerRecord` entries where `removedAt` is set and older than the threshold.
+
+```
+Options:
+  -d, --days <number>   Number of days (overrides settings, default: from cleanupDays setting)
+  -f, --force           Skip confirmation prompt
+```
+
+The default number of days is controlled by the `cleanupDays` config setting (default: 10). In interactive mode, the user is prompted to use the settings value or enter a one-time override.
+
 ### `claude-code-sandbox status`
 
 Inspects the container and prints state, image, uptime, and workspace mount.
@@ -145,6 +158,7 @@ Config keys:
 | `workspacePath` | `process.cwd()` at startup    | Default workspace mount                |
 | `authMethod`    | `null`                        | Set by `auth` wizard for reference     |
 | `defaultModel`  | `null`                        | Reserved for future use                |
+| `cleanupDays`   | `10`                          | Days to keep removed container history |
 
 ## Key Modules
 

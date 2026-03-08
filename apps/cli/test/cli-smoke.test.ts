@@ -64,7 +64,7 @@ describe('CLI binary smoke tests', () => {
     });
 
     describe('subcommand help', () => {
-        const subcommands = ['start', 'stop', 'remove', 'attach', 'shell', 'ls', 'history', 'use', 'start-all', 'stop-all', 'auth', 'config'];
+        const subcommands = ['start', 'stop', 'remove', 'attach', 'shell', 'ls', 'history', 'use', 'start-all', 'stop-all', 'remove-all', 'cleanup', 'auth', 'config'];
 
         for (const cmd of subcommands) {
             it(`${cmd} --help exits 0 and shows Usage:`, () => {

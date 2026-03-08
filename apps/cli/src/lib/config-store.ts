@@ -23,6 +23,7 @@ export interface Settings {
     currentContainerId: string | null;
     gitUserName: string | null;
     gitUserEmail: string | null;
+    cleanupDays: number;
 }
 
 export interface ConfigFile {
@@ -31,6 +32,8 @@ export interface ConfigFile {
     settings: Settings;
 }
 
+export const DEFAULT_CLEANUP_DAYS = 10;
+
 const DEFAULT_SETTINGS: Settings = {
     defaultImage: DEFAULT_IMAGE,
     defaultTag: DEFAULT_IMAGE_TAG,
@@ -38,6 +41,7 @@ const DEFAULT_SETTINGS: Settings = {
     currentContainerId: null,
     gitUserName: null,
     gitUserEmail: null,
+    cleanupDays: DEFAULT_CLEANUP_DAYS,
 };
 
 function createEmpty(): ConfigFile {
@@ -61,6 +65,7 @@ function migrate(raw: unknown): ConfigFile {
             currentContainerId: s.currentContainerId ?? null,
             gitUserName: s.gitUserName ?? null,
             gitUserEmail: s.gitUserEmail ?? null,
+            cleanupDays: typeof s.cleanupDays === 'number' ? s.cleanupDays : DEFAULT_CLEANUP_DAYS,
         };
     }
     return result;

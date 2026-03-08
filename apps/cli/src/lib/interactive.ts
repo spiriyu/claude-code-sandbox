@@ -59,6 +59,7 @@ const CONFIG_KEYS = [
     { name: 'authMethod', value: 'authMethod' },
     { name: 'gitUserName', value: 'gitUserName' },
     { name: 'gitUserEmail', value: 'gitUserEmail' },
+    { name: 'cleanupDays', value: 'cleanupDays' },
 ];
 
 export async function promptConfigGet(): Promise<string[]> {
@@ -208,6 +209,7 @@ export async function promptMainMenu(program: Command): Promise<string[] | null>
                         { name: 'Start all stopped containers', value: 'start-all' },
                         { name: 'Stop all running containers', value: 'stop-all' },
                         { name: 'Remove all containers', value: 'remove-all' },
+                        { name: 'Cleanup old history', value: 'cleanup' },
                         new Separator('── Authentication ──'),
                         { name: 'Auth setup wizard', value: 'auth-setup' },
                         { name: 'Auth status', value: 'auth-status' },
@@ -241,6 +243,7 @@ export async function promptMainMenu(program: Command): Promise<string[] | null>
                         { name: 'Start all stopped containers', value: 'start-all' },
                         { name: 'Stop all running containers', value: 'stop-all' },
                         { name: 'Remove all containers', value: 'remove-all' },
+                        { name: 'Cleanup old history', value: 'cleanup' },
                         new Separator('── Authentication ──'),
                         { name: 'Auth setup wizard', value: 'auth-setup' },
                         { name: 'Auth status', value: 'auth-status' },
@@ -278,6 +281,8 @@ export async function promptMainMenu(program: Command): Promise<string[] | null>
             return ['stop-all'];
         case 'remove-all':
             return ['__remove-all__'];
+        case 'cleanup':
+            return ['__cleanup__'];
         case 'remove':
             return ['remove'];
         case 'attach':
@@ -439,6 +444,36 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
                 const fullArgv = [...buildGlobalFlags(), 'remove-all'];
                 await parseAsyncInteractive(program, fullArgv);
                 globalOpts.id = undefined;
+                await pressAnyKey();
+                continue;
+            }
+
+            // Handle cleanup: ask user for days value
+            if (commandArgs[0] === '__cleanup__') {
+                const { select, input } = await getPrompts();
+                const settingsDays = config.settings.cleanupDays;
+                const daysChoice = await withEscBack((s) =>
+                    select<string>(
+                        {
+                            message: `Cleanup containers removed more than N days ago:`,
+                            choices: [
+                                { name: `Use settings value (${settingsDays} days)`, value: 'settings' },
+                                { name: 'Enter a different number (one-time)', value: 'custom' },
+                            ],
+                        },
+                        { signal: s }
+                    )
+                );
+                let days: string;
+                if (daysChoice === 'custom') {
+                    days = await withEscBack((s) =>
+                        input({ message: 'Number of days:', default: String(settingsDays) }, { signal: s })
+                    );
+                } else {
+                    days = String(settingsDays);
+                }
+                const fullArgv = [...buildGlobalFlags(), 'cleanup', '--days', days];
+                await parseAsyncInteractive(program, fullArgv);
                 await pressAnyKey();
                 continue;
             }
