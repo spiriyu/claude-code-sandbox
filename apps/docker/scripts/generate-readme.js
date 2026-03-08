@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 // versions.json lives in libs/shared/src — the single source of truth for the monorepo
 const versionsPath = path.join(__dirname, '..', '..', '..', 'libs', 'shared', 'src', 'versions.json');
@@ -311,4 +312,9 @@ UID=$(id -u) GID=$(id -g) docker compose run --rm claude-code-sandbox
 
 const outputPath = path.join(__dirname, '..', 'README.md');
 fs.writeFileSync(outputPath, readme);
+
+// Run prettier to match project formatting standards
+const rootDir = path.join(__dirname, '..', '..', '..');
+execSync(`npx prettier --write "${outputPath}"`, { cwd: rootDir, stdio: 'pipe' });
+
 console.log(`  Generated ${path.relative(process.cwd(), outputPath)}`);
