@@ -3,12 +3,14 @@ import { existsSync, statSync } from 'fs';
 import { resolve } from 'path';
 import { type Command } from 'commander';
 import { logger } from '../utils/logger.js';
+import { appLogger } from '../utils/app-logger.js';
 import { DEFAULT_CONFIG_DIR, DEFAULT_IMAGE, DEFAULT_IMAGE_TAG, DOCKER_IMAGE_VERSION } from './constants.js';
 import { withEscBack } from './prompt-utils.js';
 import { loadConfig, type ConfigFile } from './config-store.js';
 import { findContainerById, findContainersByWorkspace, getAllContainers } from './container-store.js';
 import { resolveWorkspace } from './workspace.js';
 import { formatContainerLine } from './selection.js';
+import { setSessionContainerId } from './session-store.js';
 import { versions } from '@claude-code-sandbox/shared';
 
 // Lazy-load @inquirer/prompts to avoid bundling CJS deps into the ESM top-level scope.
@@ -252,6 +254,7 @@ export async function promptMainMenu(program: Command): Promise<string[] | null>
 
     switch (choice) {
         case '__exit__':
+            appLogger.info('Interactive session ended (user exit)');
             process.exit(0);
             return null; // unreachable in production; needed when process.exit is mocked in tests
         case '__help__':
@@ -357,6 +360,8 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
     globalOpts.workspace = opts.workspace;
     globalOpts.configDir = opts.configDir;
 
+    appLogger.info('Interactive session started', { workspace: opts.workspace, configDir: opts.configDir });
+
     while (true) {
         logger.blank();
         const cliVersion = program.version() ?? 'unknown';
@@ -381,24 +386,32 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
             const commandArgs = await promptMainMenu(program);
             if (commandArgs === null) break;
 
+            const actionLabel = commandArgs[0] ?? '';
+            appLogger.info(`Menu action selected: ${actionLabel}`, { args: commandArgs, containerId: globalOpts.id });
+
             // Handle container selection inline — no need to shell out to a subcommand
             if (commandArgs[0] === 'use' && commandArgs.length === 1) {
                 const chosen = await promptContainerSelect(config, currentId);
                 globalOpts.id = chosen ?? undefined;
+                setSessionContainerId(chosen);
                 if (chosen) {
                     const rec = findContainerById(config, chosen);
                     const label = rec ? rec.id.replace(/-/g, '').slice(0, 8) : chosen;
                     logger.success(`Selected container: ${label}`);
+                    appLogger.info('Container selected', { containerId: chosen });
                 } else {
                     globalOpts.id = undefined;
                     logger.success('Container selection cleared.');
+                    appLogger.info('Container selection cleared');
                 }
                 // await pressAnyKey();
                 continue;
             }
             if (commandArgs[0] === 'use' && commandArgs[1] === '--clear') {
                 globalOpts.id = undefined;
+                setSessionContainerId(null);
                 logger.success('Container selection cleared.');
+                appLogger.info('Container selection cleared');
                 await pressAnyKey();
                 continue;
             }
@@ -407,6 +420,7 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
             if (commandArgs[0] === '__start-wizard__') {
                 const result = await startWizard(workspace, config.settings);
                 if (result) {
+                    appLogger.info('Start wizard completed', { workspace: result.workspace, image: result.image, tag: result.tag });
                     globalOpts.workspace = result.workspace;
                     const fullArgv = [...buildGlobalFlags(), 'start', '--image', result.image, '--tag', result.tag];
                     await parseAsyncInteractive(program, fullArgv);
@@ -418,11 +432,15 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
                         .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
                     if (newContainers.length > 0) {
                         globalOpts.id = newContainers[0].id;
+                        setSessionContainerId(newContainers[0].id);
                         const label = newContainers[0].id.replace(/-/g, '').slice(0, 8);
                         logger.success(`Auto-selected container: ${label}`);
+                        appLogger.info('Container auto-selected after deploy', { containerId: newContainers[0].id });
                     }
 
                     await pressAnyKey();
+                } else {
+                    appLogger.info('Start wizard cancelled');
                 }
                 continue;
             }
@@ -432,6 +450,7 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
                 const fullArgv = [...buildGlobalFlags(), 'remove-all'];
                 await parseAsyncInteractive(program, fullArgv);
                 globalOpts.id = undefined;
+                setSessionContainerId(null);
                 await pressAnyKey();
                 continue;
             }
@@ -458,6 +477,7 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
                 } else {
                     days = String(settingsDays);
                 }
+                appLogger.info('Cleanup action', { days });
                 const fullArgv = [...buildGlobalFlags(), 'cleanup', '--days', days];
                 await parseAsyncInteractive(program, fullArgv);
                 await pressAnyKey();
@@ -475,28 +495,35 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
                 } else {
                     globalOpts.workspace = abs;
                     logger.success(`Workspace updated: ${abs}`);
+                    appLogger.info('Workspace changed', { workspace: abs });
                 }
                 continue;
             }
 
             const fullArgv = [...buildGlobalFlags(), ...commandArgs];
             await parseAsyncInteractive(program, fullArgv);
+            appLogger.info(`Menu action completed: ${actionLabel}`);
             await pressAnyKey();
         } catch (err) {
             const name = (err as Error).name;
             if (name === 'ExitPromptError') {
+                appLogger.info('Interactive session ended (prompt closed)');
                 logger.blank();
                 process.exit(0);
                 return; // unreachable in production; needed when process.exit is mocked in tests
             }
             if (name === 'BackError') {
+                appLogger.debug('ESC pressed — returning to menu');
                 continue; // ESC pressed — redisplay the menu
             }
             // CommandExitError (process.exit called by a command) or any unexpected throw:
             // The command has already printed its error. For truly unexpected errors,
             // also print the message so the user isn't left with a blank screen.
             if (name !== 'CommandExitError' && name !== 'CommanderError') {
+                appLogger.error((err as Error).message || String(err), { errorName: name });
                 logger.error((err as Error).message || String(err));
+            } else {
+                appLogger.warn(`Command exited with error`, { errorName: name });
             }
             await pressAnyKey();
         }

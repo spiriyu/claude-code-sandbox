@@ -16,6 +16,8 @@ import { makeAuthCommand } from './commands/auth.js';
 import { makeConfigCommand } from './commands/config.js';
 import { DEFAULT_CONFIG_DIR, ENV_VARS } from './lib/constants.js';
 import { runInteractiveMode } from './lib/interactive.js';
+import { initSession } from './lib/session-store.js';
+import { appLogger } from './utils/app-logger.js';
 
 const require = createRequire(import.meta.url);
 const pkg = require('../package.json') as { version: string };
@@ -53,6 +55,17 @@ program.action(async function (this: Command) {
     }
     await runInteractiveMode(program, this.opts());
 });
+
+// Detect mode and init session before any command runs.
+{
+    const knownCommands = ['start', 'stop', 'start-all', 'stop-all', 'remove', 'remove-all', 'cleanup', 'attach', 'shell', 'ls', 'history', 'use', 'auth', 'config'];
+    const mode = process.argv.slice(2).some((a) => knownCommands.includes(a)) ? 'command' : 'interactive';
+    const configDirIdx = process.argv.indexOf('--config-dir');
+    const configDir = configDirIdx >= 0 ? process.argv[configDirIdx + 1] : (process.env[ENV_VARS.CONFIG_DIR] ?? DEFAULT_CONFIG_DIR);
+    const workspace = process.env[ENV_VARS.WORKSPACE] ?? undefined;
+    initSession(mode, { configDir, workspace });
+    appLogger.info(`CLI started`, { command: mode === 'command' ? process.argv[2] : undefined });
+}
 
 program.parseAsync(process.argv).catch((err: unknown) => {
     if ((err as Error).name === 'BackError') {
