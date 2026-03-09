@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { existsSync, statSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { type Command } from 'commander';
 import { logger } from '../utils/logger.js';
 import { appLogger } from '../utils/app-logger.js';
@@ -8,6 +8,7 @@ import { DEFAULT_CONFIG_DIR, DEFAULT_IMAGE, DEFAULT_IMAGE_TAG, DOCKER_IMAGE_VERS
 import { withEscBack } from './prompt-utils.js';
 import { loadConfig, type ConfigFile } from './config-store.js';
 import { findContainerById, findContainersByWorkspace, getAllContainers } from './container-store.js';
+import { getStoredAuth } from '../commands/auth.js';
 import { resolveWorkspace } from './workspace.js';
 import { formatContainerLine } from './selection.js';
 import { setSessionContainerId } from './session-store.js';
@@ -380,6 +381,14 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
         console.log(chalk.gray('  Container : ') + (shortId ? chalk.cyan(shortId) : chalk.dim('none')));
         console.log(chalk.gray('  Workspace : ') + chalk.cyan(workspace));
 
+        const auth = getStoredAuth(join(globalOpts.configDir, '.env'));
+        if (!auth) {
+            logger.line();
+            console.log(chalk.bgRed.white.bold('  ⚠  No authentication configured  '));
+            console.log(chalk.red('  Run: select Auth Setup Wizard options from menu'));
+            console.log(chalk.dim('  or set ANTHROPIC_API_KEY / CLAUDE_CODE_OAUTH_TOKEN env variable'));
+        }
+
         logger.line();
 
         try {
@@ -418,6 +427,17 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
 
             // Handle start wizard inline
             if (commandArgs[0] === '__start-wizard__') {
+                const wizardAuth = getStoredAuth(join(globalOpts.configDir, '.env'));
+                if (!wizardAuth) {
+                    logger.blank();
+                    logger.error('No authentication credentials found. Cannot create a new instance.');
+                    console.log(chalk.dim('  Set one of:'));
+                    console.log('    ' + chalk.yellow('ANTHROPIC_API_KEY') + chalk.dim('=sk-ant-api03-...'));
+                    console.log('    ' + chalk.yellow('CLAUDE_CODE_OAUTH_TOKEN') + chalk.dim('=sk-ant-oat01-...'));
+                    console.log(chalk.dim('  Or run: ') + chalk.cyan('claude-code-sandbox auth setup'));
+                    await pressAnyKey();
+                    continue;
+                }
                 const result = await startWizard(workspace, config.settings);
                 if (result) {
                     appLogger.info('Start wizard completed', { workspace: result.workspace, image: result.image, tag: result.tag });
