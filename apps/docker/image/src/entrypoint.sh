@@ -35,9 +35,26 @@ fi
 # Remove marketplace invalid arguments
 #necp ~/.claude.json ~/.claude.json.bak && jq 'with_entries(select(.key | startswith("officialMarketplace") | not))' ~/.claude.json.bak > ~/.claude.json
 
+# Run user-provided on-create init script exactly once per container.
+# The marker lives inside the per-container .claude-code-sandbox/ dir, so it
+# survives restarts but is unique to this container.
+SANDBOX_CONFIG_DIR="$HOME/.claude/.claude-code-sandbox"
+SANDBOX_INIT_MARKER="$SANDBOX_CONFIG_DIR/.init-done"
+if [ -n "${SANDBOX_INIT_SCRIPT:-}" ] && [ -f "${SANDBOX_INIT_SCRIPT}" ] && [ ! -f "${SANDBOX_INIT_MARKER}" ]; then
+  echo "[sandbox] running init.sh (one-time)..."
+  bash "${SANDBOX_INIT_SCRIPT}" || echo "[sandbox] init.sh exited with $?"
+  mkdir -p "${SANDBOX_CONFIG_DIR}"
+  touch "${SANDBOX_INIT_MARKER}"
+fi
+
 # Loop: restart the command after it exits so the container stays alive
 # between Claude sessions. Use Ctrl-C twice quickly to break out.
 while true; do
+  # Run user-provided on-loop script on every iteration so the user can
+  # re-apply config changes to a live container without re-creating it.
+  if [ -n "${SANDBOX_LOOP_SCRIPT:-}" ] && [ -f "${SANDBOX_LOOP_SCRIPT}" ]; then
+    bash "${SANDBOX_LOOP_SCRIPT}" || echo "[sandbox] loop.sh exited with $?"
+  fi
   claude update
   "$@"
   exit_code=$?

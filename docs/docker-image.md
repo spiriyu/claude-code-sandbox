@@ -94,7 +94,24 @@ The entrypoint runs before the container's CMD. It:
 
 1. Checks for `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN` (at least one must be non-empty)
 2. If neither is set, prints instructions and `exit 1`
-3. If valid, calls `exec "$@"` — replaces the shell process with CMD, forwarding signals (SIGTERM, SIGINT) directly to Claude/bash
+3. Applies `GIT_USER_NAME` / `GIT_USER_EMAIL` to global git config if set
+4. If `SANDBOX_INIT_SCRIPT` is set and its target exists, runs it **exactly once** per container. A marker file `/home/dev/.claude/.claude-code-sandbox/.init-done` is written on success so subsequent restarts skip it.
+5. Enters the main loop. On every iteration:
+   - If `SANDBOX_LOOP_SCRIPT` is set and its target exists, runs it (non-fatal on failure)
+   - Runs `claude update`
+   - Execs CMD (default: `claude --dangerously-skip-permissions`)
+   - On exit, sleeps 2s and restarts — container stays alive between Claude sessions
+
+### Sandbox config hooks
+
+The CLI populates `/home/dev/.claude/.claude-code-sandbox/` by **copying** files from the host (never bind-mounting), so container-side edits are isolated per container. The CLI sets these env vars when the corresponding script is present:
+
+| Env var                 | Target path                                              | When it runs        |
+| ----------------------- | -------------------------------------------------------- | ------------------- |
+| `SANDBOX_INIT_SCRIPT`   | `/home/dev/.claude/.claude-code-sandbox/init.sh`         | Once, on first boot |
+| `SANDBOX_LOOP_SCRIPT`   | `/home/dev/.claude/.claude-code-sandbox/loop.sh`         | Every loop iter     |
+
+See [`docs/cli.md`](cli.md#sandbox-config-hooks) for how to author these files.
 
 Default CMD: `bash -lc "claude --dangerously-skip-permissions"`
 

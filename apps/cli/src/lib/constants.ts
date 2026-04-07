@@ -45,6 +45,9 @@ export const CONTAINER_NAME_PREFIX = 'claude-code-sandbox-';
 // Mount paths inside the container
 export const WORKSPACE_MOUNT_PATH = '/workspace';
 export const CLAUDE_DIR_CONTAINER_PATH = '/home/dev/.claude';
+export const SANDBOX_CONFIG_CONTAINER_PATH = '/home/dev/.claude/.claude-code-sandbox';
+export const SANDBOX_INIT_SCRIPT_CONTAINER_PATH = `${SANDBOX_CONFIG_CONTAINER_PATH}/init.sh`;
+export const SANDBOX_LOOP_SCRIPT_CONTAINER_PATH = `${SANDBOX_CONFIG_CONTAINER_PATH}/loop.sh`;
 
 // Git identity env vars passed into the container
 // Backup

@@ -1,7 +1,16 @@
 import Docker from 'dockerode';
 import { mkdirSync } from 'fs';
+import { join } from 'path';
 import { type ContainerStatus } from './config-store.js';
-import { CONTAINER_NAME_PREFIX, WORKSPACE_MOUNT_PATH, CLAUDE_DIR_CONTAINER_PATH, GIT_ENV_VARS } from './constants.js';
+import {
+    CONTAINER_NAME_PREFIX,
+    WORKSPACE_MOUNT_PATH,
+    CLAUDE_DIR_CONTAINER_PATH,
+    GIT_ENV_VARS,
+    SANDBOX_INIT_SCRIPT_CONTAINER_PATH,
+    SANDBOX_LOOP_SCRIPT_CONTAINER_PATH,
+} from './constants.js';
+import { copySandboxConfig, resolveSandboxSources, SANDBOX_CONFIG_DIRNAME, SANDBOX_INIT_SCRIPT_REL, SANDBOX_LOOP_SCRIPT_REL } from './sandbox-config.js';
 
 /**
  * Convert a host path to a Docker-compatible bind-mount path.
@@ -102,6 +111,8 @@ export interface CreateContainerOptions {
     authEnv: Record<string, string>;
     gitUserName?: string | null;
     gitUserEmail?: string | null;
+    /** CLI config dir, used to resolve the global sandbox-config layer. */
+    configDir: string;
 }
 
 export async function createAndStartContainer(opts: CreateContainerOptions): Promise<void> {
@@ -109,6 +120,17 @@ export async function createAndStartContainer(opts: CreateContainerOptions): Pro
 
     // Ensure host .claude dir exists before mounting
     mkdirSync(opts.claudeDir, { recursive: true });
+
+    // Resolve and copy sandbox config (init.sh / loop.sh / MEMORY.md / files/) into
+    // the per-container .claude dir. This is a copy (not a bind mount) so container
+    // modifications can never bleed back to the host or sibling containers.
+    const sources = resolveSandboxSources(opts.configDir, opts.workspace);
+    const sandboxDestDir = join(opts.claudeDir, SANDBOX_CONFIG_DIRNAME);
+    if (sources.size > 0) {
+        copySandboxConfig(sources, sandboxDestDir);
+    }
+    const hasInit = sources.has(SANDBOX_INIT_SCRIPT_REL);
+    const hasLoop = sources.has(SANDBOX_LOOP_SCRIPT_REL);
 
     const container = await docker.createContainer({
         name: opts.name,
@@ -123,6 +145,8 @@ export async function createAndStartContainer(opts: CreateContainerOptions): Pro
             ...Object.entries(opts.authEnv).map(([k, v]) => `${k}=${v}`),
             ...(opts.gitUserName ? [`${GIT_ENV_VARS.USER_NAME}=${opts.gitUserName}`] : []),
             ...(opts.gitUserEmail ? [`${GIT_ENV_VARS.USER_EMAIL}=${opts.gitUserEmail}`] : []),
+            ...(hasInit ? [`SANDBOX_INIT_SCRIPT=${SANDBOX_INIT_SCRIPT_CONTAINER_PATH}`] : []),
+            ...(hasLoop ? [`SANDBOX_LOOP_SCRIPT=${SANDBOX_LOOP_SCRIPT_CONTAINER_PATH}`] : []),
         ],
         HostConfig: {
             Binds: [`${toDockerPath(opts.workspace)}:${WORKSPACE_MOUNT_PATH}`, `${toDockerPath(opts.claudeDir)}:${CLAUDE_DIR_CONTAINER_PATH}`],

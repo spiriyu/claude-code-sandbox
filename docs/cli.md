@@ -221,6 +221,41 @@ Thin wrapper around `conf` that enforces the `ConfigSchema` type. Exposes:
 - `logger.blank()` — empty line
 - `spinner(text)` — returns an `ora` spinner instance
 
+## Sandbox Config Hooks
+
+The CLI lets users inject custom startup behavior into sandbox containers via a
+`.claude-code-sandbox/` config directory. Files are **copied** (not bind-mounted)
+into each container's private `.claude` dir, so container-side edits never leak
+back to the host or to other containers.
+
+### Source locations (layered, workspace wins)
+
+1. Global: `~/.claude-code-sandbox/sandbox/` — applies to every container
+2. Workspace: `<workspace>/.claude-code-sandbox/` — overrides per-file
+
+### Recognized files
+
+| File          | When it runs                                                                      |
+| ------------- | --------------------------------------------------------------------------------- |
+| `init.sh`     | Exactly **once**, the first time the container starts (install skills, MCPs, …). |
+| `loop.sh`     | Before every entrypoint loop iteration — used to re-apply config on a live box.  |
+| `MEMORY.md`   | Copied to `/home/dev/.claude/.claude-code-sandbox/MEMORY.md` in every container.  |
+| `files/**`    | Any other files; copied verbatim into the same container path.                    |
+
+### Controlled updates
+
+On container **create**, all resolved files are copied fresh and a sha256
+manifest is written. On later `start` / resume of a specific container, the CLI
+re-hashes the current sources and compares against the stored manifest. If
+anything drifted, it prints the diff (added `+` / changed `~` / removed `-`) and
+prompts:
+
+- **Apply** — copies the new files over and rewrites the manifest. `init.sh` is
+  **not** re-run; on-create is strictly once. `loop.sh` picks up the new files on
+  its next iteration.
+- **Skip** — attach as-is, manifest unchanged.
+- **Cancel** — abort the command.
+
 ## Build Output
 
 tsup bundles `src/cli.ts` into a single `dist/cli.mjs` (ESM) with the `#!/usr/bin/env node` shebang prepended. Shared library code is inlined into the bundle at build time — the published npm package has no dependency on the monorepo.

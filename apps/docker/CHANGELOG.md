@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **Sandbox config hooks in entrypoint**: `entrypoint.sh` now runs
+  `$SANDBOX_INIT_SCRIPT` exactly once on first container startup (tracked via
+  `.init-done` marker inside `/home/dev/.claude/.claude-code-sandbox/`) and
+  `$SANDBOX_LOOP_SCRIPT` at the top of every main-loop iteration. Both are opt-in
+  via env vars set by the CLI and backward-compatible (no-op when unset).
+
+---
+
 ## [0.5.1] - 2026-03-09
 
 Maintenance release — version aligned with CLI v0.5.1.

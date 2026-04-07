@@ -18,6 +18,7 @@ import {
     shortId,
 } from '../lib/docker.js';
 import { ENV_VARS, DEFAULT_IMAGE, DEFAULT_IMAGE_TAG } from '../lib/constants.js';
+import { applySandboxUpdate, diffAgainstManifest, hasDrift, renderDiff, resolveSandboxSources, SANDBOX_CONFIG_DIRNAME } from '../lib/sandbox-config.js';
 import { getStoredAuth } from './auth.js';
 
 export function makeStartCommand(): Command {
@@ -129,6 +130,36 @@ export function makeStartCommand(): Command {
             }
 
             if (target) {
+                // Check for sandbox-config drift on this specific container and
+                // prompt the user before attaching. init.sh is NEVER re-run — the
+                // on-create hook is strictly one-shot.
+                const targetSandboxDest = join(configDir, 'containers', shortId(target.id), '.claude', SANDBOX_CONFIG_DIRNAME);
+                const targetSources = resolveSandboxSources(configDir, target.workspace);
+                const diff = diffAgainstManifest(targetSources, targetSandboxDest);
+                if (hasDrift(diff)) {
+                    console.log('');
+                    logger.info(`Sandbox config for container ${shortId(target.id)} is outdated:`);
+                    console.log(renderDiff(diff));
+                    console.log('');
+                    const { select } = await import('@inquirer/prompts');
+                    const action = await select<'apply' | 'skip' | 'cancel'>({
+                        message: 'How would you like to proceed?',
+                        choices: [
+                            { name: 'Apply changes (copy new files; init.sh will NOT re-run)', value: 'apply' },
+                            { name: 'Skip — attach as-is', value: 'skip' },
+                            { name: 'Cancel', value: 'cancel' },
+                        ],
+                    });
+                    if (action === 'cancel') {
+                        logger.info('Aborted.');
+                        return;
+                    }
+                    if (action === 'apply') {
+                        applySandboxUpdate(targetSources, targetSandboxDest);
+                        logger.info('Sandbox config updated. loop.sh will pick up the changes on its next iteration.');
+                    }
+                }
+
                 if (target.lastStatus === 'running') {
                     logger.info(`Container ${shortId(target.id)} is already running`);
                     console.log(`  Workspace: ${target.workspace}`);
@@ -182,6 +213,7 @@ export function makeStartCommand(): Command {
                     authEnv: auth,
                     gitUserName: config.settings.gitUserName,
                     gitUserEmail: config.settings.gitUserEmail,
+                    configDir,
                 });
 
                 const now = new Date().toISOString();

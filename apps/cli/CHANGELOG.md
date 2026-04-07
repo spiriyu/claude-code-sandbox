@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Sandbox config hooks**: containers now honor a `.claude-code-sandbox/` config
+  directory with `init.sh` (runs once on first startup), `loop.sh` (runs on every
+  entrypoint iteration), `MEMORY.md`, and arbitrary `files/**` — useful for
+  installing skills, MCP servers, or seeding per-container state. Sources are
+  layered global (`~/.claude-code-sandbox/sandbox/`) + workspace
+  (`<workspace>/.claude-code-sandbox/`), with workspace winning per file.
+- **Controlled sync with drift detection**: sandbox config files are **copied**
+  (never bind-mounted) into each container's private `.claude` dir and tracked
+  by a sha256 manifest. On resume/start, the CLI diffs current sources against
+  the manifest and, if any file changed, shows the diff and prompts
+  **Apply / Skip / Cancel**. `init.sh` is never re-run — the one-shot hook stays
+  one-shot even after applying updates.
+
 ---
 
 ## [0.6.3] - 2026-04-07
