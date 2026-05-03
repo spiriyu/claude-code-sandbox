@@ -47,6 +47,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     liblzma-dev \
     # locale \
     locales \
+    # sudo \
+    sudo \
  && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
  && locale-gen \
  && rm -rf /var/lib/apt/lists/*
@@ -63,6 +65,10 @@ RUN if getent group ${USER_GID} > /dev/null 2>&1; then \
       groupadd --gid ${USER_GID} dev; \
       useradd --uid ${USER_UID} --gid dev --create-home --shell /bin/bash dev; \
     fi
+
+# ---- sudo access for dev user ----
+RUN echo 'dev ALL=(ALL) ALL' > /etc/sudoers.d/dev \
+ && echo 'dev:toor' | chpasswd
 
 # ---- Workspace ----
 RUN mkdir -p /workspace && chown dev:$(id -gn dev) /workspace
