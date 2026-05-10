@@ -19,7 +19,7 @@ describe('constants', () => {
     });
 
     it('has correct default Python version', () => {
-        expect(DEFAULT_PYTHON_VERSION).toBe('3.13');
+        expect(DEFAULT_PYTHON_VERSION).toBe('3.14');
     });
 
     it('AUTH_METHODS contains api_key and oauth_token', () => {
