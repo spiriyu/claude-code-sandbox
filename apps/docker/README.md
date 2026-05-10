@@ -4,25 +4,25 @@
 
 ## Supported tags and respective `Dockerfile` links
 
-> Tags are prefixed with the release version at publish time (e.g. `0.6.0_node24_python3.13`). See [Build Matrix & Tagging](#build-matrix--tagging) for the full scheme.
+> Tags are prefixed with the release version at publish time (e.g. `0.7.0_node24_python3.14`). See [Build Matrix & Tagging](#build-matrix--tagging) for the full scheme.
 
-- [`latest`, `node24.14.0_python3.13`, `node24.14.0_python3`, `node24_python3.13`, `node24_python3`, `node24.14_python3.13`, `node24.14_python3`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
+- [`latest`, `node24.15.0_python3.14`, `node24.15.0_python3`, `node24_python3.14`, `node24_python3`, `node24.15_python3.14`, `node24.15_python3`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
 
-- [`node24.14.0_python3.12`, `node24_python3.12`, `node24.14_python3.12`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
+- [`node24.15.0_python3.13`, `node24_python3.13`, `node24.15_python3.13`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
 
-- [`node24.14.0_python3.11`, `node24_python3.11`, `node24.14_python3.11`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
+- [`node24.15.0_python3.11`, `node24_python3.11`, `node24.15_python3.11`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
 
-- [`node22.18.0_python3.13`, `node22.18.0_python3`, `node22_python3.13`, `node22_python3`, `node22.18_python3.13`, `node22.18_python3`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
+- [`node22.22.2_python3.14`, `node22.22.2_python3`, `node22_python3.14`, `node22_python3`, `node22.22_python3.14`, `node22.22_python3`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
 
-- [`node22.18.0_python3.12`, `node22_python3.12`, `node22.18_python3.12`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
+- [`node22.22.2_python3.13`, `node22_python3.13`, `node22.22_python3.13`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
 
-- [`node22.18.0_python3.11`, `node22_python3.11`, `node22.18_python3.11`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
+- [`node22.22.2_python3.11`, `node22_python3.11`, `node22.22_python3.11`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
 
-- [`node20.19.4_python3.13`, `node20.19.4_python3`, `node20_python3.13`, `node20_python3`, `node20.19_python3.13`, `node20.19_python3`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
+- [`node20.20.2_python3.14`, `node20.20.2_python3`, `node20_python3.14`, `node20_python3`, `node20.20_python3.14`, `node20.20_python3`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
 
-- [`node20.19.4_python3.12`, `node20_python3.12`, `node20.19_python3.12`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
+- [`node20.20.2_python3.13`, `node20_python3.13`, `node20.20_python3.13`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
 
-- [`node20.19.4_python3.11`, `node20_python3.11`, `node20.19_python3.11`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
+- [`node20.20.2_python3.11`, `node20_python3.11`, `node20.20_python3.11`](https://github.com/spiriyu/claude-code-sandbox/blob/main/apps/docker/image/Dockerfile)
 
 ## What This Image Does
 
@@ -39,7 +39,7 @@ A ready-to-use sandbox for running [Claude Code](https://docs.anthropic.com/en/d
 | `USER_UID`       | `1000`  | UID for the `dev` user             |
 | `USER_GID`       | `1000`  | GID for the `dev` user             |
 | `NODE_VERSION`   | `24`    | Node.js version installed via nvm  |
-| `PYTHON_VERSION` | `3.13`  | Python version installed via pyenv |
+| `PYTHON_VERSION` | `3.14`  | Python version installed via pyenv |
 
 ## Authentication
 
@@ -102,8 +102,8 @@ Defined in `versions.json`:
 
 ```json
 {
-    "node": ["24.14.0", "22.18.0", "20.19.4"],
-    "python": ["3.13", "3.12", "3.11"]
+    "node": ["24.15.0", "22.22.2", "20.20.2"],
+    "python": ["3.14", "3.13", "3.11"]
 }
 ```
 
@@ -115,18 +115,18 @@ CI builds the **Cartesian product** (9 combinations). Tags follow the pattern:
 
 The highest Node + highest Python combo also gets `latest` and the bare version tag.
 
-**Example tags for release `0.6.0`:**
+**Example tags for release `0.7.0`:**
 
 ```
-0.6.0_node24.14.0_python3.13   <- also tagged: latest, 0.6.0
-0.6.0_node24.14.0_python3.12
-0.6.0_node24.14.0_python3.11
-0.6.0_node22.18.0_python3.13
-0.6.0_node22.18.0_python3.12
-0.6.0_node22.18.0_python3.11
-0.6.0_node20.19.4_python3.13
-0.6.0_node20.19.4_python3.12
-0.6.0_node20.19.4_python3.11
+0.7.0_node24.15.0_python3.14   <- also tagged: latest, 0.7.0
+0.7.0_node24.15.0_python3.13
+0.7.0_node24.15.0_python3.11
+0.7.0_node22.22.2_python3.14
+0.7.0_node22.22.2_python3.13
+0.7.0_node22.22.2_python3.11
+0.7.0_node20.20.2_python3.14
+0.7.0_node20.20.2_python3.13
+0.7.0_node20.20.2_python3.11
 ```
 
 ## Quick Reference
