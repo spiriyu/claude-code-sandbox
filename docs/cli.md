@@ -235,12 +235,12 @@ back to the host or to other containers.
 
 ### Recognized files
 
-| File          | When it runs                                                                      |
-| ------------- | --------------------------------------------------------------------------------- |
-| `init.sh`     | Exactly **once**, the first time the container starts (install skills, MCPs, …). |
-| `loop.sh`     | Before every entrypoint loop iteration — used to re-apply config on a live box.  |
-| `MEMORY.md`   | Copied to `/home/dev/.claude/.claude-code-sandbox/MEMORY.md` in every container.  |
-| `files/**`    | Any other files; copied verbatim into the same container path.                    |
+| File        | When it runs                                                                     |
+| ----------- | -------------------------------------------------------------------------------- |
+| `init.sh`   | Exactly **once**, the first time the container starts (install skills, MCPs, …). |
+| `loop.sh`   | Before every entrypoint loop iteration — used to re-apply config on a live box.  |
+| `MEMORY.md` | Copied to `/home/dev/.claude/.claude-code-sandbox/MEMORY.md` in every container. |
+| `files/**`  | Any other files; copied verbatim into the same container path.                   |
 
 ### Controlled updates
 
