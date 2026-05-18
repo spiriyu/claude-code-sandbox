@@ -692,7 +692,7 @@ export async function runInteractiveMode(program: Command, opts: GlobalOpts): Pr
                 if (result) {
                     appLogger.info('Start wizard completed', { workspace: result.workspace, image: result.image, tag: result.tag });
                     globalOpts.workspace = result.workspace;
-                    const fullArgv = [...buildGlobalFlags(), 'start', '--image', result.image, '--tag', result.tag, '--backup', String(result.backup)];
+                    const fullArgv = [...buildGlobalFlags(), 'start', '--new', '--image', result.image, '--tag', result.tag, '--backup', String(result.backup)];
                     await parseAsyncInteractive(program, fullArgv);
 
                     // Persist the backup preference chosen in the wizard

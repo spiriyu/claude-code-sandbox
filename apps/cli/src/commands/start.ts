@@ -28,6 +28,7 @@ export function makeStartCommand(): Command {
         .option('--image <image>', 'Docker image name')
         .option('--tag <tag>', 'Docker image tag')
         .option('--backup <value>', 'Backup workspace before starting (true/false/1/0)')
+        .option('--new', 'Always create a new container even if one already exists for this workspace')
         .action(async function (this: Command) {
             const g = this.optsWithGlobals();
 
@@ -115,8 +116,8 @@ export function makeStartCommand(): Command {
                 if (found && found.removedAt === null) target = found;
             }
 
-            // Fall back to workspace match if no --id
-            if (!target) {
+            // Fall back to workspace match if no --id and not forcing a new container
+            if (!target && !g.new) {
                 const matches = findContainersByWorkspace(config, workspace);
                 if (matches.length === 1) target = matches[0];
                 else if (matches.length > 1) {
